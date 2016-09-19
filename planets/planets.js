@@ -6,6 +6,7 @@
 //GL context global reference.
 var gl;
 var canvas;
+var shaderProgram = {};
 
 //Galazy configuration
 var galaxySize = 10;
@@ -22,20 +23,39 @@ var starBlueOffset = .3;
 var starGreenDivisor = 8;
 var starGreenOffset  = .8;
 
+//Shooting star configuration
+var shootChance=980;
+var shooterColor = [1,1,1,1];
+
 //System configuration
 var systemCount = 10;
 
 //Individual star data is stored here. It is randomly generated.
 var stars = [];
-var points;
-var colors;
-var sizes;
+var starPoints;
+var starColors;
+var starSizes;
+var starBuffer = {};
+
 var cameraTranslation = [0,0,0,0]; //Incremented and decremented on arrow keys.
 
 //Shooting star effect data is stored here.
-var shoots = [];
-var shootChance=980;
-var shootingStarColor = [1,1,1,1];
+shooter={
+    x:galaxySize, 
+    y:galaxySize, 
+    color:[1,1,1,1],
+    length:0,
+    getPoints: function(){
+      if(!this.length) return [1.1, 1.1, 1.1, 1.1];
+      return [
+	this.x, 
+	this.y, 
+	this.x-this.length*Math.sin(this.angle*(Math.PI/180)), 
+	this.y+this.length*Math.cos(this.angle*(Math.PI/180)),
+      ];
+    }
+  };
+var shootBuffer = {};
 
 //Solar system data stored here.
 var systems = [];
@@ -93,10 +113,13 @@ function initGL(){
 //
 //Initialize shaders.
 function DoShaders(){
-  if(!initShaders(gl, VSHADER_STAR, FSHADER_STAR)){
+  shaderProgram.program=createProgram(gl, VSHADER_STAR, FSHADER_STAR);
+  gl.bindAttribLocation(shaderProgram.program, 0, 'a_Position');
+  if(!shaderProgram.program){
     console.log('Failed to initialize shaders.');
     return;
   }
+  gl.useProgram(shaderProgram.program);
 }
 
 //function SetUpData
@@ -118,16 +141,16 @@ function SetUpData(){
   }
 
   //Read data into arrays in order to send to GPU.
-  points = new Float32Array([].concat.apply([], stars.map(function(value){
+  starPoints = new Float32Array([].concat.apply([], stars.map(function(value){
       return [value.x, value.y];
   })));
-  sizes = new Float32Array(stars.map(function(value){
+  starSizes = new Float32Array(stars.map(function(value){
       return value.size;
   }));
-  colors = new Float32Array([].concat.apply([], stars.map(function(value){
+  starColors = new Float32Array([].concat.apply([], stars.map(function(value){
       return [value.red, value.green, value.blue];
   })));
-
+  
   //Generate solar system data.
   for(i=0; i<systemCount; ++i){
     systems.push({
@@ -142,43 +165,53 @@ function SetUpData(){
 function initBuffers(){
 
   //Create buffers
-  vertexBuffer = gl.createBuffer();
-  sizeBuffer = gl.createBuffer();
-  colorBuffer = gl.createBuffer();
-  if(!vertexBuffer || !sizeBuffer || !colorBuffer){
-    console.log('Failed to create the buffer objects');
+  starBuffer.vertexBuffer = gl.createBuffer();
+  starBuffer.sizeBuffer = gl.createBuffer();
+  starBuffer.colorBuffer = gl.createBuffer();
+  if(!starBuffer.vertexBuffer || !starBuffer.sizeBuffer || !starBuffer.colorBuffer){
+    console.log('Failed to create the buffer objects for stars');
+    return;
+  }
+  
+  shootBuffer.vertexBuffer=gl.createBuffer();
+  if(!shootBuffer.vertexBuffer){
+    console.log('Failed to create the buffer objects for shooting star');
     return;
   }
   
   //Get attribute locations
-  var a_Position = gl.getAttribLocation(gl.program, 'a_Position');
-  var a_Size = gl.getAttribLocation(gl.program, 'a_Size');
-  var a_Color = gl.getAttribLocation(gl.program, 'a_Color');
-  if(a_Position<0 || a_Size<0 || a_Color<0){
+  shaderProgram.a_Position = gl.getAttribLocation(shaderProgram.program, 'a_Position');
+  shaderProgram.a_Size = gl.getAttribLocation(shaderProgram.program, 'a_Size');
+  shaderProgram.a_Color = gl.getAttribLocation(shaderProgram.program, 'a_Color');
+  if(shaderProgram.a_Position<0 || shaderProgram.a_Size<0 || shaderProgram.a_Color<0){
     console.log('Failed to get the storage location of attributes');
-    console.log(a_Position);
-    console.log(a_Size);
-    console.log(a_Color);
     return;
   }
 
+  //Get uniform locations.
+  shaderProgram.u_Translation = gl.getUniformLocation(shaderProgram.program, "u_Translation");
+  if(shaderProgram.u_Translation < 0){
+    console.log("Translation location not found.");
+    return;
+  }
+
+  //STARS
   //Set up position buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(a_Position);
+  gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, starPoints, gl.STATIC_DRAW);
 
   //Set up size buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, sizeBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, sizes, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(a_Size, 1, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(a_Size);
+  gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.sizeBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, starSizes, gl.STATIC_DRAW);
 
   //Set up color buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-  gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(a_Color);
+  gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, starColors, gl.STATIC_DRAW);
+  
+  //SHOOTING STAR
+  //Set up position buffer.
+  gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
 }
 
 //function drawScene
@@ -186,15 +219,32 @@ function initBuffers(){
 //Gets camera location, and draws the stars according to their relative 
 //positions.
 function drawScene(){
-  var u_Translation = gl.getUniformLocation(gl.program, "u_Translation");
-  if(u_Translation < 0){
-    console.log("Translation location not found.");
-    return;
-  }
-  gl.uniform4fv(u_Translation, cameraTranslation);
+  gl.uniform4fv(shaderProgram.u_Translation, cameraTranslation);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
+  drawStars();
+  drawShoot();
+}
+
+function drawStars(){ 
+  initAttribute(shaderProgram.a_Position, starBuffer.vertexBuffer, 2, gl.FLOAT);
+  initAttribute(shaderProgram.a_Color, starBuffer.colorBuffer, 3, gl.FLOAT);
+  initAttribute(shaderProgram.a_Size, starBuffer.sizeBuffer, 1, gl.FLOAT);
   gl.drawArrays(gl.POINTS, 0, starCount);
+  gl.disableVertexAttribArray(shaderProgram.a_Position);
+  gl.disableVertexAttribArray(shaderProgram.a_Color);
+  gl.disableVertexAttribArray(shaderProgram.a_Size);
+}
+
+function drawShoot(){ 
+  gl.uniform4fv(shaderProgram.u_Translation, [0,0,0,0]); 
+  gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
+  initAttribute(shaderProgram.a_Position, shootBuffer.vertexBuffer, 2, gl.FLOAT);
+  gl.vertexAttrib4f(shaderProgram.a_Color, shooter.color[0], shooter.color[1], shooter.color[2], shooter.color[3]);
+  gl.vertexAttrib1f(shaderProgram.a_Size, 1);
+  gl.drawArrays(gl.LINES, 0, 2);
+  gl.disableVertexAttribArray(shootBuffer.a_Position);
 }
 
 //funciton animate
@@ -202,12 +252,24 @@ function drawScene(){
 //Updates all animated parameters.
 function animate(){
   var shootRoll=Math.random()*1000; 
-  if(shootRoll>shootChance){
-    shoots.push({
-      x: Math.random()*2-1,
-      y: 1,
-      angle: Math.random()*30
-    });
+  if(shootRoll>shootChance && shooter.length<=0){
+    shooter.x=Math.random()*2-1;    
+    shooter.y=1;
+    shooter.color=shooterColor;
+    shooter.speed=Math.random()/10+.1;
+    shooter.size=Math.random()*3;
+    shooter.length=Math.random()/2+.02;
+    shooter.angle=Math.random()*30-15;
+  } else if(shooter.length>0){
+    if(shooter.y+length<=-1){
+      shooter.x=galaxySize;
+      shooter.y=galaxySize;
+      color=[0,0,0,0];
+      shooter.length=0;
+    } else{
+      shooter.x+=shooter.speed*Math.sin(shooter.angle*(Math.PI/180));
+      shooter.y-=shooter.speed*Math.cos(shooter.angle*(Math.PI/180));
+    }
   }
 }
 
@@ -274,4 +336,10 @@ function handleKeyDown(event){
 //that was released.
 function handleKeyUp(event){
   currentlyPressedKeys[event.keyCode] = false;
+}
+
+function initAttribute(att, buffer, size, type){
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.vertexAttribPointer(att, size, type, false, 0, 0);
+  gl.enableVertexAttribArray(att);
 }
