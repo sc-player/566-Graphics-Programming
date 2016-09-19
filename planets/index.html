@@ -4,18 +4,27 @@
     <meta charset="utf-8" />
     <title>Planets</title>
     <style>
-      html, body{
+      body{
         margin:0;
         padding:0;
         height:100%;
         width:100%;
         overflow:hidden;
+        background-image:url("background.jpg");
+      }
+      canvas{
+        position: absolute;
+        top:0;
+        bottom:0;
+        left:0;
+        right:0;
+        margin:auto;
       }
     </style>
   </head>
 
   <body onload="main()">
-    <canvas id="webgl" width="100%" display="block"> 
+    <canvas id="webgl"> 
             Please use a browser that supports "canvas"
     </canvas>
     <script src="../lib/webgl-utils.js"></script>

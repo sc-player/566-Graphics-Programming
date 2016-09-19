@@ -10,11 +10,12 @@ var shaderProgram = {};
 
 //Galazy configuration
 var galaxySize = 10;
-var tileSize = 0.05;
+var tileSize = .2;
+var galaxyTileSize=galaxySize/tileSize;
 
 //Star configuration
-var starCount = 1000;
-var starSize = 3;
+var starCount = 3000;
+var starSize = 4;
 var starSizeOffset = 1;
 var starRedDivisor = 5;
 var starRedOffset = .8;
@@ -29,6 +30,24 @@ var shooterColor = [1,1,1,1];
 
 //System configuration
 var systemCount = 10;
+
+//Grid data stored here.
+var grid={
+  size: 1,
+  color: [1,1,1,1],
+  generatePoints: function(){
+    var res=[];
+    for(i=-galaxySize/2; i<galaxySize/2; i+=tileSize*2){
+      res.push([i, -galaxySize/2, i, galaxySize/2, i+tileSize, galaxySize/2, i+tileSize, -galaxySize/2])
+    }
+    if(galaxyTileSize%2==0)res.push([galaxySize/2, -galaxySize/2, galaxySize/2, galaxySize/2]);
+    for(i=galaxySize/2; i>-galaxySize/2; i-=tileSize*2){
+      res.push([galaxySize/2, i, -galaxySize/2, i, -galaxySize/2, i-tileSize, galaxySize/2, i-tileSize]);
+    }
+    if(galaxyTileSize%2==0)res.push([galaxySize/2, -galaxySize/2, -galaxySize/2, -galaxySize/2]);
+    return [].concat.apply([], res);
+  },
+};
 
 //Individual star data is stored here. It is randomly generated.
 var stars = [];
@@ -98,7 +117,7 @@ function initGL(){
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){
     canvas.height=window.innerHeight;
-    canvas.width=window.innerWidth;
+    canvas.width=window.innerHeight;
   };
   window.onresize = ResizeWindow;
   ResizeWindow();
@@ -127,6 +146,9 @@ function DoShaders(){
 //Randomly generate starCount stars.
 //Create Float32Arrays in order to send data to the GPU.
 function SetUpData(){
+
+  //Set up grid data.
+  grid.points=new Float32Array(grid.generatePoints());
 
   //Randomly generate stars.
   for(i=0; i<starCount; i++){
@@ -165,6 +187,12 @@ function SetUpData(){
 function initBuffers(){
 
   //Create buffers
+  grid.vertexBuffer=gl.createBuffer();
+  if(!grid.vertexBuffer){
+    console.log('Failed to create the buffer objects for grid');
+    return;
+  }
+
   starBuffer.vertexBuffer = gl.createBuffer();
   starBuffer.sizeBuffer = gl.createBuffer();
   starBuffer.colorBuffer = gl.createBuffer();
@@ -195,6 +223,11 @@ function initBuffers(){
     return;
   }
 
+  //GRID
+  //Set up position buffer.
+  gl.bindBuffer(gl.ARRAY_BUFFER, grid.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, grid.points, gl.STATIC_DRAW);
+
   //STARS
   //Set up position buffer.
   gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.vertexBuffer);
@@ -222,8 +255,17 @@ function drawScene(){
   gl.uniform4fv(shaderProgram.u_Translation, cameraTranslation);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
+  drawGrid();
   drawStars();
   drawShoot();
+}
+
+function drawGrid(){
+  initAttribute(shaderProgram.a_Position, grid.vertexBuffer, 2, gl.FLOAT);
+  gl.vertexAttrib4f(shaderProgram.a_Color, grid.color[0], grid.color[1], grid.color[2], grid.color[3]);
+  gl.vertexAttrib1f(shaderProgram.a_Size, grid.size);
+  gl.drawArrays(gl.LINE_STRIP, 0, grid.points.length/2);
+  gl.disableVertexAttribArray(shaderProgram.a_Position);
 }
 
 function drawStars(){ 
