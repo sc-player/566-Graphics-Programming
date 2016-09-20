@@ -131,12 +131,15 @@ var VSHADER_STAR =
   '}\n';
 
 var FSHADER_STAR =
-  'precision mediump float;' +
+  'precision mediump float;\n' +
   'varying vec4 vColor;\n' +       //Color
+  'uniform vec4 uColor;\n' +
+  'uniform int uni;\n' +
 
   //Main: Sets color of each star.
   'void main(){\n' +
-      'gl_FragColor = vColor;\n' +
+      'if(uni>0) gl_FragColor = uColor;\n' +
+      'else gl_FragColor = vColor;\n' +
   '}\n';
 
 //function initGL
@@ -274,7 +277,9 @@ function initBuffers(){
 
   //Get uniform locations.
   shaderProgram.u_Translation = gl.getUniformLocation(shaderProgram.program, "u_Translation");
-  if(shaderProgram.u_Translation < 0){
+  shaderProgram.u_Color = gl.getUniformLocation(shaderProgram.program, "uColor");
+  shaderProgram.uni = gl.getUniformLocation(shaderProgram.program, "uni");
+  if(shaderProgram.u_Translation < 0 || shaderProgram.u_Color < 0 || shaderProgram.uni < 0){
     console.log("Translation location not found.");
     return;
   }
@@ -319,19 +324,22 @@ function initBuffers(){
 //Gets camera location, and draws the stars according to their relative 
 //positions.
 function drawScene(){
-  setCameraUniform(cameraTranslation);
+  setUniform(shaderProgram.u_Translation, cameraTranslation, true);
+  setUniform(shaderProgram.uni, 1, false);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   drawGrid();
+  setUniform(shaderProgram.uni, 0, false);
   drawStars();
-  setCameraUniform([0,0,0,0]);
+  setUniform(shaderProgram.uni, 1, false);
+  setUniform(shaderProgram.u_Translation, [0,0,0,0], true);
   drawShip();
   drawShoot();
 }
 
 function drawGrid(){
   initAttribute(shaderProgram.a_Position, grid.vertexBuffer, 2, gl.FLOAT);
-  gl.vertexAttrib4f(shaderProgram.a_Color, grid.color[0], grid.color[1], grid.color[2], grid.color[3]);
+  setUniform(shaderProgram.u_Color, grid.color, true);
   gl.vertexAttrib1f(shaderProgram.a_Size, grid.size);
   gl.drawArrays(gl.LINE_STRIP, 0, grid.points.length/2);
   gl.disableVertexAttribArray(shaderProgram.a_Position);
@@ -347,25 +355,21 @@ function drawStars(){
   gl.disableVertexAttribArray(shaderProgram.a_Size);
 }
 
-function setCameraUniform(arr){
-  gl.uniform4fv(shaderProgram.u_Translation, arr); 
-}
-
 function drawShip(){
   initAttribute(shaderProgram.a_Position, ship.windowBuffer, 2, gl.FLOAT);
-  gl.vertexAttrib4f(shaderProgram.a_Color, ship.windowColor[0], ship.windowColor[1], ship.windowColor[2], ship.windowColor[3]);
+  setUniform(shaderProgram.u_Color, ship.windowColor, true);
   gl.drawArrays(gl.TRIANGLE_FAN, 0, 69);
   gl.disableVertexAttribArray(shaderProgram.a_Position);
   initAttribute(shaderProgram.a_Position, ship.vertexBuffer, 2, gl.FLOAT);
-  gl.vertexAttrib4f(shaderProgram.a_Color, ship.color[0], ship.color[1], ship.color[2], ship.color[3]);
+  setUniform(shaderProgram.u_Color, ship.color, true);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   gl.disableVertexAttribArray(shaderProgram.a_Position);
   initAttribute(shaderProgram.a_Position, ship.thrustBuffer, 2, gl.FLOAT);
-  gl.vertexAttrib4f(shaderProgram.a_Color, ship.thrustColor[0], ship.thrustColor[1], ship.thrustColor[2], ship.thrustColor[3]);
+  setUniform(shaderProgram.u_Color, ship.thrustColor, true);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 5);
   gl.disableVertexAttribArray(shaderProgram.a_Position);
   initAttribute(shaderProgram.a_Position, ship.flameBuffer, 2, gl.FLOAT);
-  gl.vertexAttrib4f(shaderProgram.a_Color, ship.flameColor[0], ship.flameColor[1], ship.flameColor[2], ship.flameColor[3]);
+  setUniform(shaderProgram.u_Color, ship.flameColor, true);
   for(i=0; i<numFlames; ++i){
     gl.drawArrays(gl.LINE_LOOP, flameDegrees*i, flameDegrees);
   }
@@ -376,7 +380,7 @@ function drawShoot(){
   gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
   initAttribute(shaderProgram.a_Position, shootBuffer.vertexBuffer, 2, gl.FLOAT);
-  gl.vertexAttrib4f(shaderProgram.a_Color, shooter.color[0], shooter.color[1], shooter.color[2], shooter.color[3]);
+  setUniform(shaderProgram.u_Color, shooter.color, true);
   gl.vertexAttrib1f(shaderProgram.a_Size, 1);
   gl.drawArrays(gl.LINES, 0, 2);
   gl.disableVertexAttribArray(shootBuffer.a_Position);
@@ -477,4 +481,15 @@ function initAttribute(att, buffer, size, type){
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(att, size, type, false, 0, 0);
   gl.enableVertexAttribArray(att);
+}
+
+var logged=false;
+function setUniform(uniform, arr, flo){
+  var res=flatten([arr]);
+  gl["uniform"+res.length+((flo) ? "f" : "i")+"v"](uniform, res); 
+}
+
+function flatten(multiDArray){
+  const flat = [].concat.apply([], multiDArray);
+  return flat.some(Array.isArray) ? flatten(flat) : flat;
 }
