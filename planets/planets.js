@@ -13,6 +13,25 @@ var galaxySize = 10;
 var tileSize = .2;
 var galaxyTileSize=galaxySize/tileSize;
 
+//Ship configuration
+var shipLength = tileSize*2/3;
+var shipWidth = tileSize/2;
+var windowRadius = tileSize/8;
+var thrustShortWidth = shipWidth/2;
+var thrustLongWidth = shipWidth*3/4;
+var thrustLength = shipLength/6;
+var flameOffset = shipLength/2;
+var flameRx = shipLength/12;
+var flameRy = shipWidth/4;
+var numFlames = 3;
+var flameDecay = shipWidth/8;
+var flameDegrees = 36;
+
+var shipColor = [0, 1, 0.5, 1];
+var windowColor = [0,0,1,1];
+var thrustColor = [.5,.5,.5,1];
+var flameColor = [1, .2, .2, 1];
+
 //Star configuration
 var starCount = 3000;
 var starSize = 4;
@@ -37,16 +56,28 @@ var grid={
   color: [1,1,1,1],
   generatePoints: function(){
     var res=[];
-    for(i=-galaxySize/2; i<galaxySize/2; i+=tileSize*2){
+    for(i=-galaxySize/2; i<=galaxySize/2; i+=tileSize*2){
       res.push([i, -galaxySize/2, i, galaxySize/2, i+tileSize, galaxySize/2, i+tileSize, -galaxySize/2])
     }
     if(galaxyTileSize%2==0)res.push([galaxySize/2, -galaxySize/2, galaxySize/2, galaxySize/2]);
-    for(i=galaxySize/2; i>-galaxySize/2; i-=tileSize*2){
+    for(i=galaxySize/2; i>=-galaxySize/2; i-=tileSize*2){
       res.push([galaxySize/2, i, -galaxySize/2, i, -galaxySize/2, i-tileSize, galaxySize/2, i-tileSize]);
     }
     if(galaxyTileSize%2==0)res.push([galaxySize/2, -galaxySize/2, -galaxySize/2, -galaxySize/2]);
     return [].concat.apply([], res);
   },
+};
+
+//Ship data stored here.
+var ship = {
+  flame: [],
+  thruster: [shipLength/2+thrustLength, -shipWidth/5, shipLength/2, -shipWidth/8, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth/2, shipLength/2, -shipWidth/5+thrustShortWidth, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth],
+  wind: [shipLength/3.5, shipWidth/3], 
+  points: [-shipLength/2, 0, shipLength/2, -shipWidth/4, shipLength/2, shipWidth/2],
+  flameColor: flameColor,
+  thrustColor: thrustColor,
+  windowColor: windowColor,
+  color: shipColor
 };
 
 //Individual star data is stored here. It is randomly generated.
@@ -70,7 +101,7 @@ shooter={
 	this.x, 
 	this.y, 
 	this.x-this.length*Math.sin(this.angle*(Math.PI/180)), 
-	this.y+this.length*Math.cos(this.angle*(Math.PI/180)),
+	this.y+this.length*Math.cos(this.angle*(Math.PI/180))
       ];
     }
   };
@@ -150,6 +181,22 @@ function SetUpData(){
   //Set up grid data.
   grid.points=new Float32Array(grid.generatePoints());
 
+  //Generate ship windshield.
+  for(i=0; i<68; ++i){
+    ship.wind.push(ship.wind[0]+Math.cos(i)*windowRadius);
+    ship.wind.push(ship.wind[1]+Math.sin(i)*windowRadius);
+  }
+
+  //Generate ship flame.
+  for(i=0; i<numFlames; ++i){
+    var startx = shipLength*3/4+thrustLength+flameOffset*i;
+    var starty = shipWidth/8;
+    for(j=0; j<flameDegrees; ++j){
+      ship.flame.push(startx+flameRx*Math.cos(j*180/Math.PI));
+      ship.flame.push(starty+(flameRy+flameDecay*i)*Math.sin(j*180/Math.PI));
+    }
+  }
+
   //Randomly generate stars.
   for(i=0; i<starCount; i++){
     stars.push({
@@ -193,6 +240,15 @@ function initBuffers(){
     return;
   }
 
+  ship.vertexBuffer=gl.createBuffer();
+  ship.windowBuffer=gl.createBuffer();
+  ship.thrustBuffer=gl.createBuffer();
+  ship.flameBuffer=gl.createBuffer();
+  if(!ship.vertexBuffer || !ship.windowBuffer || !ship.thrustBuffer || !ship.flameBuffer){
+    console.log('Failed to create the buffer objects for ship');
+    return;
+  }
+
   starBuffer.vertexBuffer = gl.createBuffer();
   starBuffer.sizeBuffer = gl.createBuffer();
   starBuffer.colorBuffer = gl.createBuffer();
@@ -228,6 +284,17 @@ function initBuffers(){
   gl.bindBuffer(gl.ARRAY_BUFFER, grid.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, grid.points, gl.STATIC_DRAW);
 
+  //SHIP
+  //Set up position buffer.
+  gl.bindBuffer(gl.ARRAY_BUFFER, ship.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ship.points), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, ship.windowBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ship.wind), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, ship.thrustBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ship.thruster), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, ship.flameBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ship.flame), gl.STATIC_DRAW);
+
   //STARS
   //Set up position buffer.
   gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.vertexBuffer);
@@ -252,11 +319,13 @@ function initBuffers(){
 //Gets camera location, and draws the stars according to their relative 
 //positions.
 function drawScene(){
-  gl.uniform4fv(shaderProgram.u_Translation, cameraTranslation);
+  setCameraUniform(cameraTranslation);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   drawGrid();
   drawStars();
+  setCameraUniform([0,0,0,0]);
+  drawShip();
   drawShoot();
 }
 
@@ -278,8 +347,32 @@ function drawStars(){
   gl.disableVertexAttribArray(shaderProgram.a_Size);
 }
 
+function setCameraUniform(arr){
+  gl.uniform4fv(shaderProgram.u_Translation, arr); 
+}
+
+function drawShip(){
+  initAttribute(shaderProgram.a_Position, ship.windowBuffer, 2, gl.FLOAT);
+  gl.vertexAttrib4f(shaderProgram.a_Color, ship.windowColor[0], ship.windowColor[1], ship.windowColor[2], ship.windowColor[3]);
+  gl.drawArrays(gl.TRIANGLE_FAN, 0, 69);
+  gl.disableVertexAttribArray(shaderProgram.a_Position);
+  initAttribute(shaderProgram.a_Position, ship.vertexBuffer, 2, gl.FLOAT);
+  gl.vertexAttrib4f(shaderProgram.a_Color, ship.color[0], ship.color[1], ship.color[2], ship.color[3]);
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.disableVertexAttribArray(shaderProgram.a_Position);
+  initAttribute(shaderProgram.a_Position, ship.thrustBuffer, 2, gl.FLOAT);
+  gl.vertexAttrib4f(shaderProgram.a_Color, ship.thrustColor[0], ship.thrustColor[1], ship.thrustColor[2], ship.thrustColor[3]);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 5);
+  gl.disableVertexAttribArray(shaderProgram.a_Position);
+  initAttribute(shaderProgram.a_Position, ship.flameBuffer, 2, gl.FLOAT);
+  gl.vertexAttrib4f(shaderProgram.a_Color, ship.flameColor[0], ship.flameColor[1], ship.flameColor[2], ship.flameColor[3]);
+  for(i=0; i<numFlames; ++i){
+    gl.drawArrays(gl.LINE_LOOP, flameDegrees*i, flameDegrees);
+  }
+  gl.disableVertexAttribArray(shaderProgram.a_Position);
+}
+
 function drawShoot(){ 
-  gl.uniform4fv(shaderProgram.u_Translation, [0,0,0,0]); 
   gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
   initAttribute(shaderProgram.a_Position, shootBuffer.vertexBuffer, 2, gl.FLOAT);
