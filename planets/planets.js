@@ -1,150 +1,18 @@
-/* Philip Strachan
+/**
+ * Philip Strachan
  * planets.js
- * Creates a background of stars that you can move around in a 2d space.
+ * Creates a space scene that you can move around in a 2d space. 
  */
 
-//GL context global reference.
+//GL global references.
 var gl;
 var canvas;
 var shaderProgram = {};
 
-//Galazy configuration
-var galaxySize = 10;
-var tileSize = .2;
-var galaxyTileSize=galaxySize/tileSize;
-
-//Ship configuration
-var shipLength = tileSize*2/3;
-var shipWidth = tileSize/2;
-var windowRadius = tileSize/8;
-var thrustShortWidth = shipWidth/2;
-var thrustLongWidth = shipWidth*3/4;
-var thrustLength = shipLength/6;
-var flameOffset = shipLength/2;
-var flameRx = shipLength/12;
-var flameRy = shipWidth/4;
-var numFlames = 3;
-var flameDecay = shipWidth/8;
-var flameDegrees = 36;
-
-var shipColor = [0, 1, 0.5, 1];
-var windowColor = [0,0,1,1];
-var thrustColor = [.5,.5,.5,1];
-var flameColor = [1, .2, .2, 1];
-
-//Star configuration
-var starCount = 3000;
-var starSize = 4;
-var starSizeOffset = 1;
-var starRedDivisor = 5;
-var starRedOffset = .8;
-var starBlueDivisor = 3;
-var starBlueOffset = .3;
-var starGreenDivisor = 8;
-var starGreenOffset  = .8;
-
-//Shooting star configuration
-var shootChance=980;
-var shooterColor = [1,1,1,1];
-
-//System configuration
-var systemCount = 10;
-
-//Grid data stored here.
-var grid={
-  size: 1,
-  color: [1,1,1,1],
-  generatePoints: function(){
-    var res=[];
-    for(i=-galaxySize/2; i<=galaxySize/2; i+=tileSize*2){
-      res.push([i, -galaxySize/2, i, galaxySize/2, i+tileSize, galaxySize/2, i+tileSize, -galaxySize/2])
-    }
-    if(galaxyTileSize%2==0)res.push([galaxySize/2, -galaxySize/2, galaxySize/2, galaxySize/2]);
-    for(i=galaxySize/2; i>=-galaxySize/2; i-=tileSize*2){
-      res.push([galaxySize/2, i, -galaxySize/2, i, -galaxySize/2, i-tileSize, galaxySize/2, i-tileSize]);
-    }
-    if(galaxyTileSize%2==0)res.push([galaxySize/2, -galaxySize/2, -galaxySize/2, -galaxySize/2]);
-    return [].concat.apply([], res);
-  },
-};
-
-//Ship data stored here.
-var ship = {
-  flame: [],
-  thruster: [shipLength/2+thrustLength, -shipWidth/5, shipLength/2, -shipWidth/8, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth/2, shipLength/2, -shipWidth/5+thrustShortWidth, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth],
-  wind: [shipLength/3.5, shipWidth/3], 
-  points: [-shipLength/2, 0, shipLength/2, -shipWidth/4, shipLength/2, shipWidth/2],
-  flameColor: flameColor,
-  thrustColor: thrustColor,
-  windowColor: windowColor,
-  color: shipColor
-};
-
-//Individual star data is stored here. It is randomly generated.
-var stars = [];
-var starPoints;
-var starColors;
-var starSizes;
-var starBuffer = {};
-
-var cameraTranslation = [0,0,0,0]; //Incremented and decremented on arrow keys.
-
-//Shooting star effect data is stored here.
-shooter={
-    x:galaxySize, 
-    y:galaxySize, 
-    color:[1,1,1,1],
-    length:0,
-    getPoints: function(){
-      if(!this.length) return [1.1, 1.1, 1.1, 1.1];
-      return [
-	this.x, 
-	this.y, 
-	this.x-this.length*Math.sin(this.angle*(Math.PI/180)), 
-	this.y+this.length*Math.cos(this.angle*(Math.PI/180))
-      ];
-    }
-  };
-var shootBuffer = {};
-
-//Solar system data stored here.
-var systems = [];
-
-//Shader programs.
-
-var VSHADER_STAR = 
-
-  //Inputs
-  'attribute vec4 a_Position;\n' +   //Absolute Position
-  'attribute float a_Size;\n' +      //Size
-  'attribute vec4 a_Color;\n' +      //Color
-  'uniform vec4 u_Translation;\n' +  //Camera offset
-
-  //Outputs
-  'varying vec4 vColor;\n' +       
-
-  //Main: Sets position and size, and sets the output color.
-  'void main() {\n' +
-  '  gl_Position = a_Position + u_Translation;\n' +
-  '  gl_PointSize = a_Size;\n' +
-  '  vColor = a_Color;\n' +
-  '}\n';
-
-var FSHADER_STAR =
-  'precision mediump float;\n' +
-  'varying vec4 vColor;\n' +       //Color
-  'uniform vec4 uColor;\n' +
-  'uniform int uni;\n' +
-
-  //Main: Sets color of each star.
-  'void main(){\n' +
-      'if(uni>0) gl_FragColor = uColor;\n' +
-      'else gl_FragColor = vColor;\n' +
-  '}\n';
-
-//function initGL
-//
-//Sets the global context reference, and sets event handlers.
+/* function initGL
+ *
+ * Sets the global context reference, and sets event handlers.
+ */
 function initGL(){
   canvas=document.getElementById('webgl');
   document.onkeydown = handleKeyDown;
@@ -162,10 +30,17 @@ function initGL(){
   }
 }
 
-//function DoShaders
-//
-//Initialize shaders.
+/* function DoShaders
+ *
+ * Initialize shaders.
+ */
 function DoShaders(){
+  var VSHADER_STAR = loadExternalShader("vstar.glsl");
+  var FSHADER_STAR = loadExternalShader("fstar.glsl");
+  if(!VSHADER_STAR || !FSHADER_STAR){
+    console.log("Star shaders cant be found");
+    return;
+  }
   shaderProgram.program=createProgram(gl, VSHADER_STAR, FSHADER_STAR);
   gl.bindAttribLocation(shaderProgram.program, 0, 'a_Position');
   if(!shaderProgram.program){
@@ -175,30 +50,12 @@ function DoShaders(){
   gl.useProgram(shaderProgram.program);
 }
 
-//function SetUpData
-//
-//Randomly generate starCount stars.
-//Create Float32Arrays in order to send data to the GPU.
+/* function SetUpData
+ *
+ * Randomly generate starCount stars.
+ * Create Float32Arrays in order to send data to the GPU.
+ */
 function SetUpData(){
-
-  //Set up grid data.
-  grid.points=new Float32Array(grid.generatePoints());
-
-  //Generate ship windshield.
-  for(i=0; i<68; ++i){
-    ship.wind.push(ship.wind[0]+Math.cos(i)*windowRadius);
-    ship.wind.push(ship.wind[1]+Math.sin(i)*windowRadius);
-  }
-
-  //Generate ship flame.
-  for(i=0; i<numFlames; ++i){
-    var startx = shipLength*3/4+thrustLength+flameOffset*i;
-    var starty = shipWidth/8;
-    for(j=0; j<flameDegrees; ++j){
-      ship.flame.push(startx+flameRx*Math.cos(j*180/Math.PI));
-      ship.flame.push(starty+(flameRy+flameDecay*i)*Math.sin(j*180/Math.PI));
-    }
-  }
 
   //Randomly generate stars.
   for(i=0; i<starCount; i++){
@@ -222,18 +79,12 @@ function SetUpData(){
   starColors = new Float32Array([].concat.apply([], stars.map(function(value){
       return [value.red, value.green, value.blue];
   })));
-  
-  //Generate solar system data.
-  for(i=0; i<systemCount; ++i){
-    systems.push({
-      x: Math.round((Math.random()*galaxySize-galaxySize/2)/0.05)*0.05
-    });
-  }
 }
 
-//function initBuffers
-//
-//Sets up star absolute position buffer, size buffer, and color buffer.
+/* function initBuffers
+ *
+ * Sets up star absolute position buffer, size buffer, and color buffer.
+ */
 function initBuffers(){
 
   //Create buffers
@@ -319,10 +170,9 @@ function initBuffers(){
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
 }
 
-//function drawScene
-//
-//Gets camera location, and draws the stars according to their relative 
-//positions.
+/**
+ * Gets camera location and draws the scene.
+ */
 function drawScene(){
   setUniform(shaderProgram.u_Translation, cameraTranslation, true);
   setUniform(shaderProgram.uni, 1, false);
@@ -337,14 +187,20 @@ function drawScene(){
   drawShoot();
 }
 
+/**
+ * Draw grid. 
+ */
 function drawGrid(){
   initAttribute(shaderProgram.a_Position, grid.vertexBuffer, 2, gl.FLOAT);
   setUniform(shaderProgram.u_Color, grid.color, true);
   gl.vertexAttrib1f(shaderProgram.a_Size, grid.size);
-  gl.drawArrays(gl.LINE_STRIP, 0, grid.points.length/2);
+  gl.drawArrays(gl.LINES, 0, grid.points.length/2);
   gl.disableVertexAttribArray(shaderProgram.a_Position);
 }
 
+/**
+ * Draw Stars 
+ */
 function drawStars(){ 
   initAttribute(shaderProgram.a_Position, starBuffer.vertexBuffer, 2, gl.FLOAT);
   initAttribute(shaderProgram.a_Color, starBuffer.colorBuffer, 3, gl.FLOAT);
@@ -355,6 +211,9 @@ function drawStars(){
   gl.disableVertexAttribArray(shaderProgram.a_Size);
 }
 
+/**
+ * Draw Ship 
+ */
 function drawShip(){
   initAttribute(shaderProgram.a_Position, ship.windowBuffer, 2, gl.FLOAT);
   setUniform(shaderProgram.u_Color, ship.windowColor, true);
@@ -376,6 +235,9 @@ function drawShip(){
   gl.disableVertexAttribArray(shaderProgram.a_Position);
 }
 
+/**
+ * Draw shooting star. 
+ */
 function drawShoot(){ 
   gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
@@ -386,9 +248,9 @@ function drawShoot(){
   gl.disableVertexAttribArray(shootBuffer.a_Position);
 }
 
-//funciton animate
-//
-//Updates all animated parameters.
+/**
+ * Updates all animated parameters.
+ */
 function animate(){
   var shootRoll=Math.random()*1000; 
   if(shootRoll>shootChance && shooter.length<=0){
@@ -412,23 +274,23 @@ function animate(){
   }
 }
 
-//function tick
-//
-//Main loop
+/**
+ * Main loop
+ */
 function tick(){
   requestAnimationFrame(tick);
   drawScene();
   animate();
 }
 
-//function main
-//
-//Entry point.
-//  Initialization
-//  Set up Shaders
-//  Set up Data
-//  Create and set up buffers
-//  Begin loop
+/**
+ *  Entry point.
+ *   Initialization
+ *   Set up Shaders
+ *   Set up Data
+ *   Create and set up buffers
+ *   Begin loop
+ */
 function main(){
   initGL(); 
   DoShaders();
@@ -440,10 +302,10 @@ function main(){
 //What keys are we pressing?
 var currentlyPressedKeys = {};
 
-//function handleKeyDown
-//
-//Called on key press. Enables the variable corresponding to the keycode of
-//the key that was pressed.  If it is an arrow key, change camera position.
+/**
+ * Called on key press. Enables the variable corresponding to the keycode of
+ * the key that was pressed.  If it is an arrow key, change camera position.
+ */
 function handleKeyDown(event){
   if(currentlyPressedKeys[event.keyCode]==true) return;
   currentlyPressedKeys[event.keyCode] = true;
@@ -469,27 +331,10 @@ function handleKeyDown(event){
   }
 }
 
-//function handleKeyUp
-//
-//Called when a key is released. Disables boolean corresponding to the key
-//that was released.
+/**
+ * Called when a key is released. Disables boolean corresponding to the key
+ * that was released.
+ */
 function handleKeyUp(event){
   currentlyPressedKeys[event.keyCode] = false;
-}
-
-function initAttribute(att, buffer, size, type){
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.vertexAttribPointer(att, size, type, false, 0, 0);
-  gl.enableVertexAttribArray(att);
-}
-
-var logged=false;
-function setUniform(uniform, arr, flo){
-  var res=flatten([arr]);
-  gl["uniform"+res.length+((flo) ? "f" : "i")+"v"](uniform, res); 
-}
-
-function flatten(multiDArray){
-  const flat = [].concat.apply([], multiDArray);
-  return flat.some(Array.isArray) ? flatten(flat) : flat;
 }
