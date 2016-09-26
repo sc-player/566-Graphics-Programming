@@ -8,6 +8,7 @@
 var gl;
 var canvas;
 var shaderProgram = {};
+var cameraTranslation = [0,0,0,0];
 
 /* function initGL
  *
@@ -50,37 +51,6 @@ function DoShaders(){
   gl.useProgram(shaderProgram.program);
 }
 
-/* function SetUpData
- *
- * Randomly generate starCount stars.
- * Create Float32Arrays in order to send data to the GPU.
- */
-function SetUpData(){
-
-  //Randomly generate stars.
-  for(i=0; i<starCount; i++){
-    stars.push({
-      x: Math.random()*galaxySize-galaxySize/2, 
-      y: Math.random()*galaxySize-galaxySize/2, 
-      size: Math.random()*starSize+starSizeOffset, 
-      red: Math.random()/starRedDivisor+starRedOffset, 
-      green: Math.random()/starGreenDivisor+starGreenOffset, 
-      blue: Math.random()/starBlueDivisor+starBlueOffset
-    });
-  }
-
-  //Read data into arrays in order to send to GPU.
-  starPoints = new Float32Array([].concat.apply([], stars.map(function(value){
-      return [value.x, value.y];
-  })));
-  starSizes = new Float32Array(stars.map(function(value){
-      return value.size;
-  }));
-  starColors = new Float32Array([].concat.apply([], stars.map(function(value){
-      return [value.red, value.green, value.blue];
-  })));
-}
-
 /* function initBuffers
  *
  * Sets up star absolute position buffer, size buffer, and color buffer.
@@ -103,10 +73,10 @@ function initBuffers(){
     return;
   }
 
-  starBuffer.vertexBuffer = gl.createBuffer();
-  starBuffer.sizeBuffer = gl.createBuffer();
-  starBuffer.colorBuffer = gl.createBuffer();
-  if(!starBuffer.vertexBuffer || !starBuffer.sizeBuffer || !starBuffer.colorBuffer){
+  stars.vertexBuffer = gl.createBuffer();
+  stars.colorBuffer = gl.createBuffer();
+  stars.sizeBuffer = gl.createBuffer();
+  if(!stars.vertexBuffer || !stars.colorBuffer || !stars.sizeBuffer){
     console.log('Failed to create the buffer objects for stars');
     return;
   }
@@ -153,16 +123,16 @@ function initBuffers(){
 
   //STARS
   //Set up position buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, starPoints, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, stars.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, stars.points, gl.STATIC_DRAW);
 
   //Set up size buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.sizeBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, starSizes, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, stars.sizeBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, stars.sizes, gl.STATIC_DRAW);
 
   //Set up color buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer.colorBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, starColors, gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, stars.colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, stars.colors, gl.STATIC_DRAW);
   
   //SHOOTING STAR
   //Set up position buffer.
@@ -202,9 +172,9 @@ function drawGrid(){
  * Draw Stars 
  */
 function drawStars(){ 
-  initAttribute(shaderProgram.a_Position, starBuffer.vertexBuffer, 2, gl.FLOAT);
-  initAttribute(shaderProgram.a_Color, starBuffer.colorBuffer, 3, gl.FLOAT);
-  initAttribute(shaderProgram.a_Size, starBuffer.sizeBuffer, 1, gl.FLOAT);
+  initAttribute(shaderProgram.a_Position, stars.vertexBuffer, 2, gl.FLOAT);
+  initAttribute(shaderProgram.a_Color, stars.colorBuffer, 3, gl.FLOAT);
+  initAttribute(shaderProgram.a_Size, stars.sizeBuffer, 1, gl.FLOAT);
   gl.drawArrays(gl.POINTS, 0, starCount);
   gl.disableVertexAttribArray(shaderProgram.a_Position);
   gl.disableVertexAttribArray(shaderProgram.a_Color);
@@ -294,47 +264,6 @@ function tick(){
 function main(){
   initGL(); 
   DoShaders();
-  SetUpData();
   initBuffers();
   tick();
-}
-
-//What keys are we pressing?
-var currentlyPressedKeys = {};
-
-/**
- * Called on key press. Enables the variable corresponding to the keycode of
- * the key that was pressed.  If it is an arrow key, change camera position.
- */
-function handleKeyDown(event){
-  if(currentlyPressedKeys[event.keyCode]==true) return;
-  currentlyPressedKeys[event.keyCode] = true;
-  switch(event.keyCode){
-    case 37:  //left arrow
-      if(cameraTranslation[0]<galaxySize/2)
-        cameraTranslation[0]+=tileSize;
-      break;
-    case 38:  //up arrow
-      if(cameraTranslation[1]>-galaxySize/2)
-      cameraTranslation[1]-=tileSize;
-      break;
-    case 39:  //right arrow
-      if(cameraTranslation[0]>-galaxySize/2)
-      cameraTranslation[0]-=tileSize;
-      break;
-    case 40:  //down arrow
-      if(cameraTranslation[1]<galaxySize/2)
-      cameraTranslation[1]+=tileSize;
-      break;
-    default:
-      break;
-  }
-}
-
-/**
- * Called when a key is released. Disables boolean corresponding to the key
- * that was released.
- */
-function handleKeyUp(event){
-  currentlyPressedKeys[event.keyCode] = false;
 }

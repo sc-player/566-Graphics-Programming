@@ -49,13 +49,31 @@ var ship = {
 };
 
 //Individual star data is stored here. It is randomly generated.
-var stars = [];
-var starPoints;
-var starColors;
-var starSizes;
-var starBuffer = {};
-
-var cameraTranslation = [0,0,0,0]; //Incremented and decremented on arrow keys.
+var stars = {
+  points: function(){
+    var res=[];
+    for(i=0; i<starCount*2; i++){
+      res.push(Math.random()*galaxySize-galaxySize/2);
+    }
+    return new Float32Array(res);
+  }(),
+  colors: function(){
+    var res = [];
+    for(i=0; i<starCount; i++){
+      res.push(Math.random()/starRedDivisor+starRedOffset);
+      res.push(Math.random()/starGreenDivisor+starGreenOffset);
+      res.push(Math.random()/starBlueDivisor+starBlueOffset);
+    }
+    return new Float32Array(res);
+  }(),
+  sizes: function(){
+    var res = [];
+    for(i=0; i<starCount; i++){
+      res.push(Math.random()*starSize+starSizeOffset);
+    }
+    return new Float32Array(res);
+  }(),
+};
 
 //Shooting star effect data is stored here.
 shooter={
