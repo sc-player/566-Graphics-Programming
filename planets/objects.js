@@ -44,7 +44,8 @@ var ship = {
   flameColor: flameColor,
   thrustColor: thrustColor,
   windowColor: windowColor,
-  color: shipColor
+  color: shipColor,
+  modelMatrix: new Matrix4()
 };
 
 //Individual star data is stored here. It is randomly generated.

@@ -12,18 +12,22 @@ function handleKeyDown(event){
     case 37:  //left arrow
       if(cameraTranslation[0]<galaxySize/2)
         cameraTranslation[0]+=tileSize;
+        ship.modelMatrix.setRotate(0, 0, 0, 1);
       break;
     case 38:  //up arrow
       if(cameraTranslation[1]>-galaxySize/2)
       cameraTranslation[1]-=tileSize;
+      ship.modelMatrix.setRotate(90, 0, 0, 1);
       break;
     case 39:  //right arrow
       if(cameraTranslation[0]>-galaxySize/2)
       cameraTranslation[0]-=tileSize;
+      ship.modelMatrix.setRotate(180, 0, 0, 1);
       break;
     case 40:  //down arrow
       if(cameraTranslation[1]<galaxySize/2)
       cameraTranslation[1]+=tileSize;
+      ship.modelMatrix.setRotate(-90, 0, 0, 1);
       break;
     default:
       break;

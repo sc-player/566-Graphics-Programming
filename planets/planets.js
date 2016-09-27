@@ -96,7 +96,8 @@ function initShaders(){
 
   //Get uniform locations.
   ship.program.u_Color = gl.getUniformLocation(ship.program, 'u_Color');
-  if(ship.program.u_Color < 0){ 
+  ship.program.u_Model = gl.getUniformLocation(ship.program, 'u_Model');
+  if(ship.program.u_Color < 0 || ship.program.u_Model < 0){ 
     console.log("Translation location not found.");
     return;
   }
@@ -222,6 +223,7 @@ function drawShip(){
   gl.useProgram(ship.program);
   initAttribute(ship.program.a_Position, ship.windowBuffer, 2, gl.FLOAT);
   setUniform(ship.program.u_Color, ship.windowColor, true);
+  gl.uniformMatrix4fv(ship.program.u_Model, false, ship.modelMatrix.elements);
   gl.drawArrays(gl.TRIANGLE_FAN, 0, 69);
   initAttribute(ship.program.a_Position, ship.vertexBuffer, 2, gl.FLOAT);
   setUniform(ship.program.u_Color, ship.color, true);
