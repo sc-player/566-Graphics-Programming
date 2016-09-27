@@ -1,6 +1,18 @@
-function loadExternalShader(filepath, callback){
+var shaderDir = "shaders/";
+
+function createShaderProgram(vert, frag){
+  var VSHADER = loadExternalShader(vert);
+  var FSHADER = loadExternalShader(frag);
+  if(!VSHADER || !FSHADER){
+    console.log("Shader " + vert + " or " + frag + " cannot be found!");
+    return;
+  }
+  return createProgram(gl, VSHADER, FSHADER);
+}
+
+function loadExternalShader(filepath){
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', filepath, false);
+  xhr.open('GET', shaderDir+filepath, false);
   xhr.send(null);
   return xhr.responseText;
 }
@@ -39,4 +51,15 @@ function setUniform(uniform, arr, flo){
 function flatten(multiDArray){
   const flat = [].concat.apply([], multiDArray);
   return flat.some(Array.isArray) ? flatten(flat) : flat;
+}
+
+function createBuffer(){
+  var buff = gl.createBuffer();
+  try{
+    return buff;
+  }
+  catch(err){
+    throw ('Failed to create buffer object! ' + err.message);
+    return null;
+  }
 }

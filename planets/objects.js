@@ -19,8 +19,7 @@ var grid={
 
 //Ship data stored here.
 var ship = {
-  flame: [],
-  thruster: [shipLength/2+thrustLength, -shipWidth/5, shipLength/2, -shipWidth/8, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth/2, shipLength/2, -shipWidth/5+thrustShortWidth, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth],
+  thruster: new Float32Array([shipLength/2+thrustLength, -shipWidth/5, shipLength/2, -shipWidth/8, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth/2, shipLength/2, -shipWidth/5+thrustShortWidth, shipLength/2+thrustLength, -shipWidth/3+thrustLongWidth]),
   wind: function(){
     var res = [shipLength/3.5, shipWidth/3];
     for(i=0; i<68; ++i){
@@ -29,7 +28,7 @@ var ship = {
     }
     return new Float32Array(res);
   }(),
-  points: [-shipLength/2, 0, shipLength/2, -shipWidth/4, shipLength/2, shipWidth/2],
+  points: new Float32Array([-shipLength/2, 0, shipLength/2, -shipWidth/4, shipLength/2, shipWidth/2]),
   flame: function(){
     var res = [];
     for(i=0; i<numFlames; ++i){
