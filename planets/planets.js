@@ -8,6 +8,7 @@
 var gl;
 var canvas;
 var cameraTranslation = [0,0,0,0];
+var shouldDraw=true;
 
 /* function initGL
  *
@@ -143,7 +144,7 @@ function initBuffers(){
   stars.colorBuffer = createBuffer();
   stars.sizeBuffer = createBuffer();
   
-  shootBuffer.vertexBuffer=createBuffer();
+  shooter.vertexBuffer=createBuffer();
 
   //GRID
   //Set up position buffer.
@@ -176,7 +177,7 @@ function initBuffers(){
   
   //SHOOTING STAR
   //Set up position buffer.
-  gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
+  gl.bindBuffer(gl.ARRAY_BUFFER, shooter.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
 }
 
@@ -191,6 +192,7 @@ function drawScene(){
   setUniform(stars.program.u_Translation, [0,0,0,0], true);
   drawShip();
   drawShoot();
+  shouldDraw=false;
 }
 
 /**
@@ -244,9 +246,9 @@ function drawShip(){
  */
 function drawShoot(){ 
   gl.useProgram(shooter.program);
-  gl.bindBuffer(gl.ARRAY_BUFFER, shootBuffer.vertexBuffer);
+  gl.bindBuffer(gl.ARRAY_BUFFER, shooter.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
-  initAttribute(shooter.program.a_Position, shootBuffer.vertexBuffer, 2, gl.FLOAT);
+  initAttribute(shooter.program.a_Position, shooter.vertexBuffer, 2, gl.FLOAT);
   setUniform(shooter.program.u_Color, shooter.color, true);
   gl.drawArrays(gl.LINES, 0, 2);
 }
@@ -257,6 +259,7 @@ function drawShoot(){
 function animate(){
   var shootRoll=Math.random()*1000; 
   if(shootRoll>shootChance && shooter.length<=0){
+    shouldDraw=true;
     shooter.x=Math.random()*2-1;    
     shooter.y=1;
     shooter.color=shooterColor;
@@ -271,6 +274,7 @@ function animate(){
       color=[0,0,0,0];
       shooter.length=0;
     } else{
+      shouldDraw=true;
       shooter.x+=shooter.speed*Math.sin(shooter.angle*(Math.PI/180));
       shooter.y-=shooter.speed*Math.cos(shooter.angle*(Math.PI/180));
     }

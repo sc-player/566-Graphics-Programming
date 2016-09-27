@@ -95,7 +95,8 @@ shooter={
         this.x-this.length*Math.sin(this.angle*(Math.PI/180)),
         this.y+this.length*Math.cos(this.angle*(Math.PI/180))
       ];
-    }
-  };
-var shootBuffer = {};
+    },
+    modelMatrix: new Matrix4()
+};
+
 

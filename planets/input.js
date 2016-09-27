@@ -7,6 +7,7 @@ var currentlyPressedKeys = {};
  */
 function handleKeyDown(event){
   if(currentlyPressedKeys[event.keyCode]==true) return;
+  shouldDraw=true;
   currentlyPressedKeys[event.keyCode] = true;
   switch(event.keyCode){
     case 37:  //left arrow
@@ -23,6 +24,7 @@ function handleKeyDown(event){
       if(cameraTranslation[0]>-galaxySize/2)
       cameraTranslation[0]-=tileSize;
       ship.modelMatrix.setRotate(180, 0, 0, 1);
+      ship.modelMatrix.rotate(180, 1, 0, 0);
       break;
     case 40:  //down arrow
       if(cameraTranslation[1]<galaxySize/2)
