@@ -15,6 +15,13 @@ var grid={
     }
     return new Float32Array([].concat.apply([], res));
   }(),
+  draw: function(){
+    gl.useProgram(this.program);
+    setUniform(grid.program.u_Translation, cameraTranslation, true);
+    setUniform(grid.program.u_Color, grid.color, true);
+    initAttribute(grid.program.a_Position, grid.vertexBuffer, 2, gl.FLOAT);
+    gl.drawArrays(gl.LINES, 0, grid.points.length/2);
+  }
 };
 
 //Ship data stored here.
@@ -45,7 +52,26 @@ var ship = {
   thrustColor: thrustColor,
   windowColor: windowColor,
   color: shipColor,
-  modelMatrix: new Matrix4()
+  modelMatrix: new Matrix4(),
+  draw: function(){
+    gl.useProgram(ship.program);
+    initAttribute(ship.program.a_Position, ship.windowBuffer, 2, gl.FLOAT);
+    setUniform(ship.program.u_Color, ship.windowColor, true);
+    gl.uniformMatrix4fv(ship.program.u_Model, false, ship.modelMatrix.elements);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 69);
+    initAttribute(ship.program.a_Position, ship.vertexBuffer, 2, gl.FLOAT);
+    setUniform(ship.program.u_Color, ship.color, true);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    initAttribute(ship.program.a_Position, ship.thrustBuffer, 2, gl.FLOAT);
+    setUniform(ship.program.u_Color, ship.thrustColor, true);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 5);
+    initAttribute(ship.program.a_Position, ship.flameBuffer, 2, gl.FLOAT);
+    setUniform(ship.program.u_Color, ship.flameColor, true);
+    for(i=0; i<numFlames; ++i){
+      gl.drawArrays(gl.LINE_LOOP, flameDegrees*i, flameDegrees);
+    }
+    gl.disableVertexAttribArray(ship.program.a_Position);
+  }
 };
 
 //Individual star data is stored here. It is randomly generated.
@@ -73,16 +99,31 @@ var stars = {
     }
     return new Float32Array(res);
   }(),
+  draw: function(){
+    gl.useProgram(stars.program);
+    setUniform(stars.program.u_Translation, cameraTranslation, true);
+    initAttribute(stars.program.a_Position, stars.vertexBuffer, 2, gl.FLOAT);
+    initAttribute(stars.program.a_Color, stars.colorBuffer, 3, gl.FLOAT);
+    initAttribute(stars.program.a_Size, stars.sizeBuffer, 1, gl.FLOAT);
+    gl.drawArrays(gl.POINTS, 0, starCount);
+  }
 };
 
 //Shooting star effect data is stored here.
 shooter={
-    points:new Float32Array([0,1,0,1.2]),
-    color:[1,1,1,1],
-    modelMatrix: new Matrix4(),
-    speed:0,
-    angle:0,
-    size:0
+  points:new Float32Array([0,1,0,1.2]),
+  color:[1,1,1,1],
+  modelMatrix: new Matrix4(),
+  speed:0,
+  angle:0,
+  size:0,
+  draw: function(){
+    gl.useProgram(shooter.program);
+    initAttribute(shooter.program.a_Position, shooter.vertexBuffer, 2, gl.FLOAT);
+    setUniform(shooter.program.u_Color, shooter.color, true);
+    gl.uniformMatrix4fv(shooter.program.u_Model, false, shooter.modelMatrix.elements);
+    gl.drawArrays(gl.LINES, 0, 2);
+  }
 };
 
 
