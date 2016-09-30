@@ -119,7 +119,8 @@ function initShaders(){
 
   //Get uniform locations.
   shooter.program.u_Color = gl.getUniformLocation(shooter.program, 'u_Color');
-  if(shooter.program.u_Color < 0){ 
+  shooter.program.u_Model = gl.getUniformLocation(shooter.program, 'u_Model');
+  if(shooter.program.u_Color < 0 || shooter.program.u_Model < 0){ 
     console.log("Translation location not found.");
     return;
   }
@@ -178,7 +179,7 @@ function initBuffers(){
   //SHOOTING STAR
   //Set up position buffer.
   gl.bindBuffer(gl.ARRAY_BUFFER, shooter.vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, shooter.points, gl.STREAM_DRAW);
 }
 
 /**
@@ -246,10 +247,9 @@ function drawShip(){
  */
 function drawShoot(){ 
   gl.useProgram(shooter.program);
-  gl.bindBuffer(gl.ARRAY_BUFFER, shooter.vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(shooter.getPoints()), gl.STREAM_DRAW);
   initAttribute(shooter.program.a_Position, shooter.vertexBuffer, 2, gl.FLOAT);
   setUniform(shooter.program.u_Color, shooter.color, true);
+  gl.uniformMatrix4fv(shooter.program.u_Model, false, shooter.modelMatrix.elements);
   gl.drawArrays(gl.LINES, 0, 2);
 }
 
@@ -258,25 +258,26 @@ function drawShoot(){
  */
 function animate(){
   var shootRoll=Math.random()*1000; 
-  if(shootRoll>shootChance && shooter.length<=0){
+  if(shootRoll>shootChance && shooter.speed<=0){
     shouldDraw=true;
-    shooter.x=Math.random()*2-1;    
-    shooter.y=1;
     shooter.color=shooterColor;
     shooter.speed=Math.random()/10+.1;
     shooter.size=Math.random()*3;
-    shooter.length=Math.random()/2+.02;
+    var length=Math.random()*50+50;
     shooter.angle=Math.random()*30-15;
-  } else if(shooter.length>0){
-    if(shooter.y+length<=-1){
-      shooter.x=galaxySize;
-      shooter.y=galaxySize;
-      color=[0,0,0,0];
-      shooter.length=0;
+    shooter.modelMatrix.setScale(1, length, 1);
+    shooter.modelMatrix.setRotate(shooter.angle, 0, 0, 1);
+    shooter.modelMatrix.setTranslate(Math.random()*2-1, 1, 0);
+  } else if(shooter.speed>0){
+    if(shooter.modelMatrix.elements[13]+shooter.modelMatrix.elements[5]<=-1){
+      shooter.color=[0,0,0,1];
+      shooter.speed=0;
+      shooter.size=0;
+      shooter.angle=0;
+      shooter.modelMatrix.setIdentity();
     } else{
       shouldDraw=true;
-      shooter.x+=shooter.speed*Math.sin(shooter.angle*(Math.PI/180));
-      shooter.y-=shooter.speed*Math.cos(shooter.angle*(Math.PI/180));
+      shooter.modelMatrix.translate(shooter.speed*Math.sin(shooter.angle*(Math.PI/180)), -shooter.speed*Math.cos(shooter.angle*(Math.PI/180)), 0);
     }
   }
 }
@@ -286,8 +287,8 @@ function animate(){
  */
 function tick(){
   requestAnimationFrame(tick);
-  drawScene();
   animate();
+  drawScene();
 }
 
 /**

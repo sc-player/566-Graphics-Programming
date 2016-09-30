@@ -77,26 +77,12 @@ var stars = {
 
 //Shooting star effect data is stored here.
 shooter={
-    x:galaxySize,
-    y:galaxySize,
+    points:new Float32Array([0,1,0,1.2]),
     color:[1,1,1,1],
-    length:0,
-
-/**
- * Gets current vertices of the shooting star.
- *
- * @return {Array} Array of vertices for the shooting star.
- */
-    getPoints: function(){
-      if(!this.length) return [1.1, 1.1, 1.1, 1.1];
-      return [
-        this.x,
-        this.y,
-        this.x-this.length*Math.sin(this.angle*(Math.PI/180)),
-        this.y+this.length*Math.cos(this.angle*(Math.PI/180))
-      ];
-    },
-    modelMatrix: new Matrix4()
+    modelMatrix: new Matrix4(),
+    speed:0,
+    angle:0,
+    size:0
 };
 
 
