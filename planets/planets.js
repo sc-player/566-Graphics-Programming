@@ -9,7 +9,7 @@ var gl;
 var canvas;
 var cameraTranslation = [0,0,0,0];
 var shouldDraw=true;
-var drawArray = [stars, grid, ship, shooter];
+var drawArray = [stars, grid, planets, ship, shooter];
 
 /* function initGL
  *
@@ -29,6 +29,11 @@ function initGL(){
   if(!gl){
     console.log('Failed to get rendering context for WebGL');
     return;
+  }
+  planets.centers=[];
+  for(i=0; i<planetCount*74; i+=74){
+    planets.centers.push(planets.points[i]);
+    planets.centers.push(planets.points[i+1]);
   }
 }
 
@@ -125,6 +130,21 @@ function initShaders(){
     console.log("Translation location not found.");
     return;
   }
+  
+  planets.program = createShaderProgram("vplanet.glsl", "fplanet.glsl");
+
+  planets.program.a_Position = gl.getAttribLocation(planets.program, 'a_Position');
+  if(planets.program.a_Position<0){
+    console.log('Failed to get the storage location of attributes');
+    return;
+  }
+
+  planets.program.u_Color = gl.getUniformLocation(planets.program, 'u_Color');
+  planets.program.u_Translation = gl.getUniformLocation(planets.program, 'u_Translation');
+  if(planets.program.u_Color < 0  || planets.program.u_Translation < 0){
+    console.log('Uniform locations not found.');
+    return;
+  }
 
 }
 
@@ -147,6 +167,8 @@ function initBuffers(){
   stars.sizeBuffer = createBuffer();
   
   shooter.vertexBuffer=createBuffer();
+
+  planets.vertexBuffer=createBuffer();
 
   //GRID
   //Set up position buffer.
@@ -181,6 +203,11 @@ function initBuffers(){
   //Set up position buffer.
   gl.bindBuffer(gl.ARRAY_BUFFER, shooter.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, shooter.points, gl.STREAM_DRAW);
+
+  //PLANETS
+  //Set up position buffer
+  gl.bindBuffer(gl.ARRAY_BUFFER, planets.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, planets.points, gl.STATIC_DRAW);
 }
 
 /**
@@ -229,6 +256,7 @@ function animate(){
  */
 function tick(){
   requestAnimationFrame(tick);
+  player.updateHud();
   animate();
   drawScene();
 }

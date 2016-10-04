@@ -11,25 +11,37 @@ function handleKeyDown(event){
   currentlyPressedKeys[event.keyCode] = true;
   switch(event.keyCode){
     case 37:  //left arrow
-      if(cameraTranslation[0]<galaxySize/2)
+      if(cameraTranslation[0]<galaxySize/2 && player.fuel>0){
         cameraTranslation[0]+=tileSize;
         ship.modelMatrix.setRotate(0, 0, 0, 1);
+        player.fuel--;
+        player.checkPlanet();
+      }
       break;
     case 38:  //up arrow
-      if(cameraTranslation[1]>-galaxySize/2)
-      cameraTranslation[1]-=tileSize;
-      ship.modelMatrix.setRotate(90, 0, 0, 1);
+      if(cameraTranslation[1]>-galaxySize/2 && player.fuel>0){
+        cameraTranslation[1]-=tileSize;
+        ship.modelMatrix.setRotate(90, 0, 0, 1);
+        player.fuel--;
+        player.checkPlanet();
+      }
       break;
     case 39:  //right arrow
-      if(cameraTranslation[0]>-galaxySize/2)
-      cameraTranslation[0]-=tileSize;
-      ship.modelMatrix.setRotate(180, 0, 0, 1);
-      ship.modelMatrix.rotate(180, 1, 0, 0);
+      if(cameraTranslation[0]>-galaxySize/2 && player.fuel>0){
+        cameraTranslation[0]-=tileSize;
+        ship.modelMatrix.setRotate(180, 0, 0, 1);
+        ship.modelMatrix.rotate(180, 1, 0, 0);
+        player.fuel--;
+        player.checkPlanet();
+      }
       break;
     case 40:  //down arrow
-      if(cameraTranslation[1]<galaxySize/2)
-      cameraTranslation[1]+=tileSize;
-      ship.modelMatrix.setRotate(-90, 0, 0, 1);
+      if(cameraTranslation[1]<galaxySize/2 && player.fuel>0){
+        cameraTranslation[1]+=tileSize;
+        ship.modelMatrix.setRotate(-90, 0, 0, 1);
+        player.fuel--;
+        player.checkPlanet();
+      }
       break;
     default:
       break;

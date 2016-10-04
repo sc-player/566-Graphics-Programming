@@ -37,3 +37,8 @@ var starGreenOffset  = .8;
 var shootChance=980;
 var shooterColor = [1,1,1,1];
 
+//Planets configuration
+var planetCount = 20;
+var planetDegrees=36;
+var planetSize=.05;
+
