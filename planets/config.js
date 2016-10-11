@@ -1,3 +1,11 @@
+//Environment Configuration
+var imageDir = "img/";
+var shaderDir= "shaders/";
+
+//Get webgl canvas and context
+var canvas=document.getElementById('webgl'); 
+var gl = getWebGLContext(canvas);
+
 //Galaxy Configuration
 var galaxySize = 10;
 var tileSize = .2;
@@ -41,4 +49,13 @@ var shooterColor = [1,1,1,1];
 var planetCount = 20;
 var planetDegrees=36;
 var planetSize=.05;
-
+var planetTypes=[
+  "Barren",
+  "Rocky",
+  "Jungle",
+  "Plains",
+  "Water",
+  "Icy",
+  "Fiery",
+  "Metropolis"
+];

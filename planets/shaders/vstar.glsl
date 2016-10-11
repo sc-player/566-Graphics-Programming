@@ -1,8 +1,7 @@
-//Inputs
-attribute vec4 a_Position;   //Absolute Position
-attribute float a_Size;      //Size
-attribute vec4 a_Color;      //Color
-uniform vec4 u_Translation;  //Camera offset
+attribute vec4 a_Position;   
+attribute float a_Size;      
+attribute vec4 a_Color;      
+uniform vec4 u_Translation;  
 
 //Outputs
 varying vec4 vColor;

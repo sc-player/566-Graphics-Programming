@@ -1,7 +1,6 @@
 precision mediump float; 
-varying vec4 vColor;       //Color
+varying vec4 vColor;       
 
-//Main: Sets color of each star.
 void main(){
   gl_FragColor = vColor;
 }

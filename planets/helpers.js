@@ -1,5 +1,3 @@
-var shaderDir = "shaders/";
-
 function createShaderProgram(vert, frag){
   var VSHADER = loadExternalShader(vert);
   var FSHADER = loadExternalShader(frag);
@@ -53,6 +51,17 @@ function flatten(multiDArray){
   return flat.some(Array.isArray) ? flatten(flat) : flat;
 }
 
+function getShaderVar(program, name){
+  return (name[0]==='u') ? gl.getUniformLocation(program, name) : gl.getAttribLocation(program, name);
+}
+
+function createArrBuffer(data, draw){
+  var res = createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, res);
+  gl.bufferData(gl.ARRAY_BUFFER, data, draw);
+  return res;
+}
+
 function createBuffer(){
   var buff = gl.createBuffer();
   try{
@@ -62,4 +71,21 @@ function createBuffer(){
     throw ('Failed to create buffer object! ' + err.message);
     return null;
   }
+}
+
+function loadTexture(texName){
+  res = gl.createTexture();
+  res.image = new Image();
+  res.image.onload = function(){handleLoadedTexture(ship.windowTexture);};
+  res.image.src=imageDir + "ship.gif";
+  return res;
+}
+
+function handleLoadedTexture(texture){
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.bindTexture(gl.TEXTURE_2D, null);
 }
