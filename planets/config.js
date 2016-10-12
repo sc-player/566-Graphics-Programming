@@ -2,6 +2,9 @@
 var imageDir = "img/";
 var shaderDir= "shaders/";
 
+//Shape Configuration
+var circleDegrees = 36; 
+
 //Get webgl canvas and context
 var canvas=document.getElementById('webgl'); 
 var gl = getWebGLContext(canvas);
@@ -46,8 +49,7 @@ var shootChance=980;
 var shooterColor = [1,1,1,1];
 
 //Planets configuration
-var planetCount = 20;
-var planetDegrees=36;
+var planetCount = 30;
 var planetSize=.05;
 var planetTypes=[
   "Barren",

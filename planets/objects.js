@@ -30,7 +30,7 @@ var grid={
   draw: function(){
     setUniform(grid.program.u_Translation, cameraTranslation, true);
     setUniform(grid.program.u_Color, grid.color, true);
-    initAttribute(grid.program.a_Position, grid.vertexBuffer, 2, gl.FLOAT);
+    initAttribute(grid.program.a_Position, grid.vertexBuffer, 2, gl.FLOAT, 0, 0);
     gl.drawArrays(gl.LINES, 0, grid.points.length/2);
   }
 };
@@ -55,7 +55,7 @@ var ship = {
   },
   draw: function(){
     if(player.fuel<=0) return;
-    initAttribute(ship.program.a_Position, ship.windowBuffer, 2, gl.FLOAT);
+  /*  initAttribute(ship.program.a_Position, ship.windowBuffer, 2, gl.FLOAT);
     setUniform(ship.program.u_Color, ship.windowColor, true);
     gl.uniformMatrix4fv(ship.program.u_Model, false, ship.modelMatrix.elements);
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 69);
@@ -70,7 +70,7 @@ var ship = {
     for(i=0; i<numFlames; ++i){
       gl.drawArrays(gl.LINE_LOOP, flameDegrees*i, flameDegrees);
     }
-    gl.disableVertexAttribArray(ship.program.a_Position);
+    gl.disableVertexAttribArray(ship.program.a_Position);*/
   }
 };
 
@@ -113,9 +113,9 @@ var stars = {
   },
   draw: function(){
     setUniform(stars.program.u_Translation, cameraTranslation, true);
-    initAttribute(stars.program.a_Position, stars.vertexBuffer, 2, gl.FLOAT);
-    initAttribute(stars.program.a_Color, stars.colorBuffer, 3, gl.FLOAT);
-    initAttribute(stars.program.a_Size, stars.sizeBuffer, 1, gl.FLOAT);
+    initAttribute(stars.program.a_Position, stars.vertexBuffer, 2, gl.FLOAT, 0, 0);
+    initAttribute(stars.program.a_Color, stars.colorBuffer, 3, gl.FLOAT, 0, 0);
+    initAttribute(stars.program.a_Size, stars.sizeBuffer, 1, gl.FLOAT, 0, 0);
     gl.drawArrays(gl.POINTS, 0, starCount);
   }
 };
@@ -137,7 +137,7 @@ shooter={
     shooter.vertexBuffer=createArrBuffer(shooter.points, gl.DYNAMIC_DRAW);
   },
   draw: function(){
-    initAttribute(shooter.program.a_Position, shooter.vertexBuffer, 2, gl.FLOAT);
+    initAttribute(shooter.program.a_Position, shooter.vertexBuffer, 2, gl.FLOAT, 0, 0);
     setUniform(shooter.program.u_Color, shooter.color, true);
     gl.uniformMatrix4fv(shooter.program.u_Model, false, shooter.modelMatrix.elements);
     gl.drawArrays(gl.LINES, 0, 2);
@@ -164,9 +164,15 @@ planets={
       roll = Math.random()*galaxySize-galaxySize/2;
       var centery=roll-roll%tileSize;
       res.push(centery);
-      for(j=0; j<planetDegrees; ++j){
-        res.push(centerx+planetSize*Math.cos(j*180/Math.PI));
-        res.push(centery+planetSize*Math.sin(j*180/Math.PI));
+      res.push(0);
+      res.push(0);
+      for(j=0; j<circleDegrees; ++j){
+        var cos=Math.cos(j*180/Math.PI);
+        var sin=Math.sin(j*180/Math.PI);
+        res.push(centerx+planetSize*cos);
+        res.push(centery+planetSize*sin);
+        res.push(cos);
+        res.push(sin);
       }
     }
     return new Float32Array(res);
@@ -181,9 +187,9 @@ planets={
   draw: function(){
     setUniform(planets.program.u_Translation, cameraTranslation, true);
     setUniform(planets.program.u_Color, planets.color, true);
-    initAttribute(planets.program.a_Position, planets.vertexBuffer, 2, gl.FLOAT);
+    initAttribute(planets.program.a_Position, planets.vertexBuffer, 2, gl.FLOAT, 16, 0);
     for(i=0; i<planetCount; ++i){
-      gl.drawArrays(gl.TRIANGLE_FAN, i*planetDegrees+i, planets.points.length/(2*planetCount));
+      gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+1), circleDegrees+1);
     }
   }
 }

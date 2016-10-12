@@ -25,11 +25,7 @@ function initGL(){
   };
   window.onresize = ResizeWindow;
   ResizeWindow();
-  planets.centers=[];
-  for(i=0; i<planetCount*74; i+=74){
-    planets.centers.push(planets.points[i]);
-    planets.centers.push(planets.points[i+1]);
-  }
+  player.init();
   drawArray.forEach(function(val){
     val["program"]=createShaderProgram(val["vshader"], val["fshader"]);
     gl.bindAttribLocation(val["program"], 0, 'a_Position');
@@ -58,13 +54,14 @@ function animate(){
   if(shootRoll>shootChance && shooter.speed<=0){
     shouldDraw=true;
     shooter.color=shooterColor;
-    shooter.speed=Math.random()/10+.1;
+    shooter.speed=Math.random()/15+.09;
     shooter.size=Math.random()*3;
-    var length=Math.random()*50+50;
+    var length=Math.random()*2+1;
     shooter.angle=Math.random()*30-15;
-    shooter.modelMatrix.setScale(1, length, 1);
-    shooter.modelMatrix.setRotate(shooter.angle, 0, 0, 1);
-    shooter.modelMatrix.setTranslate(Math.random()*2-1, 1, 0);
+    shooter.modelMatrix.setTranslate(0, -1, 0);
+    shooter.modelMatrix.rotate(shooter.angle, 0, 0, 1); 
+    shooter.modelMatrix.scale(1, length, 1);
+    shooter.modelMatrix.translate(Math.random()*2-1, 1, 0);
   } else if(shooter.speed>0){
     if(shooter.modelMatrix.elements[13]+shooter.modelMatrix.elements[5]<=-1){
       shooter.color=[0,0,0,1];
@@ -92,9 +89,6 @@ function tick(){
 /**
  *  Entry point.
  *   Initialization
- *   Set up Shaders
- *   Set up Data
- *   Create and set up buffers
  *   Begin loop
  */
 function main(){

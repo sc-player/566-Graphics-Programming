@@ -23,9 +23,9 @@ function loadExternalShader(filepath){
  * @param {number} size Elements to bind to a single vertex.
  * @param {type} type GL type enum.
  */
-function initAttribute(att, buffer, size, type){
+function initAttribute(att, buffer, size, type, start, stride){
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.vertexAttribPointer(att, size, type, false, 0, 0);
+  gl.vertexAttribPointer(att, size, type, false, start, stride);
   gl.enableVertexAttribArray(att);
 }
 
