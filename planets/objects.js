@@ -147,9 +147,19 @@ shooter={
 planets={
   vshader: "vplanet.glsl",
   fshader: "fplanet.glsl",
+  types: function(){
+    var res=[];
+    for(i=0; i<planetCount; ++i){
+      res.push({
+	index: Math.round(Math.random()*planetTypes.length)
+      }); 
+      res[i].texture=loadTexture(planetTypes[res[i].index] + ".gif");
+    }
+    return res;
+  }(),
 //  hostile: (Math.random()>.5),
   fuel: function(){
-    res=[];
+    var res=[];
     for(i=0; i<planetCount; ++i){
       res.push(Math.round(Math.random()*5+10));
     }
@@ -162,34 +172,38 @@ planets={
       var centerx = roll-roll%tileSize;
       res.push(centerx);
       roll = Math.random()*galaxySize-galaxySize/2;
-      var centery=roll-roll%tileSize;
+      var centery = roll-roll%tileSize;
       res.push(centery);
-      res.push(0);
-      res.push(0);
-      for(j=0; j<circleDegrees; ++j){
-        var cos=Math.cos(j*180/Math.PI);
-        var sin=Math.sin(j*180/Math.PI);
+      res.push(0.5);
+      res.push(0.5);
+      var angle = 360/circleDegrees;
+      for(j=0; j<circleDegrees+1; ++j){ 
+        var cos=Math.cos(angle*j*Math.PI/180);
+        var sin=Math.sin(angle*j*Math.PI/180);
         res.push(centerx+planetSize*cos);
         res.push(centery+planetSize*sin);
-        res.push(cos);
-        res.push(sin);
+        res.push(cos/2+.5);
+        res.push(sin/2+.5);
       }
     }
     return new Float32Array(res);
   }(),
-  color: [66/255, 44/255, 26/255, 1],
   init: function(){
     planets.program.a_Position=getShaderVar(planets.program, 'a_Position');
-    planets.program.u_Color=getShaderVar(planets.program, 'u_Color');
+    planets.program.a_TexCoord=getShaderVar(planets.program, 'a_TexCoord');
     planets.program.u_Translation=getShaderVar(planets.program, 'u_Translation');
+    planets.program.u_Image=getShaderVar(planets.program, 'u_Image');
     planets.vertexBuffer=createArrBuffer(planets.points, gl.STATIC_DRAW);
+    planets.texUnit=getNewTexUnit();
   },
   draw: function(){
     setUniform(planets.program.u_Translation, cameraTranslation, true);
     setUniform(planets.program.u_Color, planets.color, true);
     initAttribute(planets.program.a_Position, planets.vertexBuffer, 2, gl.FLOAT, 16, 0);
+    initAttribute(planets.program.a_TexCoord, planets.vertexBuffer, 2, gl.FLOAT, 16, 8);
     for(i=0; i<planetCount; ++i){
-      gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+1), circleDegrees+1);
+      setTexture(planets, planets.types[i].texture);
+      gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+2), circleDegrees+2);
     }
   }
 }

@@ -50,14 +50,14 @@ var shooterColor = [1,1,1,1];
 
 //Planets configuration
 var planetCount = 30;
-var planetSize=.05;
+var planetSize=.08;
 var planetTypes=[
-  "Barren",
-  "Rocky",
-  "Jungle",
-  "Plains",
-  "Water",
-  "Icy",
-  "Fiery",
-  "Metropolis"
+  "barren",
+  "metropolis",
+  "rocky",
+  "jungle",
+  "plains",
+  "water",
+  "icy",
+  "fiery"
 ];

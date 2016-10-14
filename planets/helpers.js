@@ -1,3 +1,21 @@
+var texUnits=[];
+function getNewTexUnit(){
+  for(i=0; i<16; ++i){
+    if(!texUnits[i]){
+      texUnits[i]=true;
+      return gl["TEXTURE"+i];
+    }
+  }
+}
+
+function setTexture(object, texture){
+  gl.activeTexture(object.texUnit);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
+  setUniform(object.u_Image, object.texUnit);
+}
+
 function createShaderProgram(vert, frag){
   var VSHADER = loadExternalShader(vert);
   var FSHADER = loadExternalShader(frag);
@@ -76,8 +94,8 @@ function createBuffer(){
 function loadTexture(texName){
   res = gl.createTexture();
   res.image = new Image();
-  res.image.onload = function(){handleLoadedTexture(ship.windowTexture);};
-  res.image.src=imageDir + "ship.gif";
+  res.image.onload = function(){handleLoadedTexture(res);};
+  res.image.src=imageDir + texName;
   return res;
 }
 
