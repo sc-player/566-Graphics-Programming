@@ -39,38 +39,31 @@ var grid={
 var ship = {
   vshader: "vship.glsl",
   fshader: "fship.glsl",
-  texCoords: [0, 0, 1, 0, 1, 1, 0, 1],
-  points: new Float32Array([-shipLength/2, 0, shipLength/2, -shipWidth/4, shipLength/2, shipWidth/2]),
-  //shipTexture: loadTexture("ship.gif"),
+  blend: true,
+  texCoords: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+  points: new Float32Array([-shipWidth, -shipHeight, shipWidth, -shipHeight, -shipWidth, shipHeight, shipWidth, shipWidth]),
+  texture: loadTexture("ship.gif"),
   modelMatrix: new Matrix4(),
   init: function(){
     //Get attribute locations
     ship.program.a_Position = getShaderVar(ship.program, 'a_Position');
+    ship.program.a_TexCoord = getShaderVar(ship.program, 'a_TexCoord');   
 
     //Get uniform locations.
-    ship.program.u_Color = getShaderVar(ship.program, 'u_Color');
     ship.program.u_Model = getShaderVar(ship.program, 'u_Model');
+    ship.program.u_Image=getShaderVar(ship.program, 'u_Image');
 
     ship.vertexBuffer=createArrBuffer(ship.points, gl.STATIC_DRAW);
+    ship.textureBuffer=createArrBuffer(ship.texCoords, gl.STATIC_DRAW);
+    ship.texUnit=getNewTexUnit();
   },
   draw: function(){
-    if(player.fuel<=0) return;
-  /*  initAttribute(ship.program.a_Position, ship.windowBuffer, 2, gl.FLOAT);
-    setUniform(ship.program.u_Color, ship.windowColor, true);
+    if(player.fuel <= 0 || !checkTexLoaded(ship.texture)) return;
+    setTexture(ship, ship.texture);
     gl.uniformMatrix4fv(ship.program.u_Model, false, ship.modelMatrix.elements);
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 69);
-    initAttribute(ship.program.a_Position, ship.vertexBuffer, 2, gl.FLOAT);
-    setUniform(ship.program.u_Color, ship.color, true);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-    initAttribute(ship.program.a_Position, ship.thrustBuffer, 2, gl.FLOAT);
-    setUniform(ship.program.u_Color, ship.thrustColor, true);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 5);
-    initAttribute(ship.program.a_Position, ship.flameBuffer, 2, gl.FLOAT);
-    setUniform(ship.program.u_Color, ship.flameColor, true);
-    for(i=0; i<numFlames; ++i){
-      gl.drawArrays(gl.LINE_LOOP, flameDegrees*i, flameDegrees);
-    }
-    gl.disableVertexAttribArray(ship.program.a_Position);*/
+    initAttribute(ship.program.a_Position, ship.vertexBuffer, 2, gl.FLOAT, 0, 0);
+    initAttribute(ship.program.a_TexCoord, ship.textureBuffer, 2, gl.FLOAT, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 };
 
@@ -147,13 +140,18 @@ shooter={
 planets={
   vshader: "vplanet.glsl",
   fshader: "fplanet.glsl",
+  blend: true,
+  textures: function(){
+    var res=[];
+    for(i=0; i<planetTypes.length; ++i){
+      res.push(loadTexture(planetTypes[i] + ".gif"));
+    }
+    return res;
+  }(),
   types: function(){
     var res=[];
-    for(i=0; i<planetCount; ++i){
-      res.push({
-	index: Math.round(Math.random()*planetTypes.length)
-      }); 
-      res[i].texture=loadTexture(planetTypes[res[i].index] + ".gif");
+    for(i=0; i<planetCount; i++){
+      res.push(Math.floor(Math.random()*planetTypes.length));
     }
     return res;
   }(),
@@ -194,15 +192,14 @@ planets={
     planets.program.u_Translation=getShaderVar(planets.program, 'u_Translation');
     planets.program.u_Image=getShaderVar(planets.program, 'u_Image');
     planets.vertexBuffer=createArrBuffer(planets.points, gl.STATIC_DRAW);
-    planets.texUnit=getNewTexUnit();
   },
   draw: function(){
     setUniform(planets.program.u_Translation, cameraTranslation, true);
-    setUniform(planets.program.u_Color, planets.color, true);
     initAttribute(planets.program.a_Position, planets.vertexBuffer, 2, gl.FLOAT, 16, 0);
     initAttribute(planets.program.a_TexCoord, planets.vertexBuffer, 2, gl.FLOAT, 16, 8);
     for(i=0; i<planetCount; ++i){
-      setTexture(planets, planets.types[i].texture);
+      if(!checkTexLoaded(planets.textures[planets.types[i]])) continue;
+      setTexture(planets, planets.textures[planets.types[i]]);
       gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+2), circleDegrees+2);
     }
   }

@@ -9,7 +9,7 @@ var gl;
 var canvas;
 var cameraTranslation = [0,0,0,0];
 var shouldDraw=true;
-var drawArray = [stars, grid, planets, shooter];
+var drawArray = [stars, grid, planets, ship, shooter];
 
 /* function initGL
  *
@@ -26,6 +26,8 @@ function initGL(){
   window.onresize = ResizeWindow;
   ResizeWindow();
   player.init();
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  gl.enable(gl.DEPTH_TEST);
   drawArray.forEach(function(val){
     val["program"]=createShaderProgram(val["vshader"], val["fshader"]);
     gl.bindAttribLocation(val["program"], 0, 'a_Position');
@@ -37,13 +39,19 @@ function initGL(){
  * Gets camera location and draws the scene.
  */
 function drawScene(){
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   drawArray.forEach(function(val){
     gl.useProgram(val["program"]);
+    if(val["blend"]){
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+      gl.enable(gl.BLEND);
+      gl.disable(gl.DEPTH_TEST);
+    } else {
+      gl.disable(gl.BLEND);
+      gl.enable(gl.DEPTH_TEST);
+    }
     val["draw"]();
   });
-  shouldDraw=false;
 }
 
 /**

@@ -15,23 +15,8 @@ var tileSize = .2;
 var galaxyTileSize=galaxySize/tileSize;
 
 //Ship configuration
-var shipLength = tileSize*2/3;
-var shipWidth = tileSize/2;
-var windowRadius = tileSize/8;
-var thrustShortWidth = shipWidth/2;
-var thrustLongWidth = shipWidth*3/4;
-var thrustLength = shipLength/6;
-var flameOffset = shipLength/2;
-var flameRx = shipLength/12;
-var flameRy = shipWidth/4;
-var numFlames = 3;
-var flameDecay = shipWidth/8;
-var flameDegrees = 36;
-
-var shipColor = [0, 1, 0.5, 1];
-var windowColor = [0,0,1,1];
-var thrustColor = [.5,.5,.5,1];
-var flameColor = [1, .2, .2, 1];
+var shipWidth = .2;
+var shipHeight = .2;
 
 //Star configuration
 var starCount = 3000;
