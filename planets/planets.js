@@ -9,7 +9,7 @@ var gl;
 var canvas;
 var cameraTranslation = [0,0,0,0];
 var shouldDraw=true;
-var drawArray = [stars, grid, planets, ship, shooter];
+var drawArray = [stars, grid, ship, planets, shooter];
 
 /* function initGL
  *
@@ -33,6 +33,13 @@ function initGL(){
     gl.bindAttribLocation(val["program"], 0, 'a_Position');
     val["init"]();
   });
+}
+
+function checkForLoaded(){
+  drawArray.forEach(function(val){
+    if(!val["loaded"]) return true;
+  });
+  return false;
 }
 
 /**
@@ -101,5 +108,6 @@ function tick(){
  */
 function main(){
   initGL(); 
+  while(checkForLoaded()){}
   tick();
 }

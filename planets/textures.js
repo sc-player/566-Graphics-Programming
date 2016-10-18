@@ -11,36 +11,23 @@ function getNewTexUnit(){
   }
 }
 
-function checkTexLoaded(texture){
-  return texLoaded[texture.unitIndex];
+function loadTexture(texName, object){
+  function newTexture(obj, uni, img){
+    tex = gl.createTexture();
+    tex.unit = gl["TEXTURE"+uni];
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    tex.image=img;
+    texLoaded[uni]=true;
+    obj.textures[uni]=tex;
+    obj["checkObjLoaded"]();
+  }
+  var unit = getNewTexUnit();
+  gl.activeTexture(gl["TEXTURE"+unit]);
+  var image = new Image();
+  image.src=imageDir+texName;
+  image.onLoad = newTexture(object, unit, image);
 }
-
-function setTexture(object, texture){
-  gl.activeTexture(texture.unit);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-  setUniform(object.u_Image, texture.unit);
-}
-
-function loadTexture(texName){
-  res = gl.createTexture();
-  res.image = new Image();
-  res.unitIndex=getNewTexUnit();
-  res.unit = gl["TEXTURE"+res.unitIndex];
-  res.image.onload = function(tex, src){handleLoadedTexture(tex, src);}(res, imageDir+texName);
-  res.image.src=imageDir + texName;
-  return res;
-}
-
-function handleLoadedTexture(texture, src){
-  texture.image.src=src;
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, texture.image);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.bindTexture(gl.TEXTURE_2D, null);
-  texLoaded[texture.unitIndex]=true;
-}
-

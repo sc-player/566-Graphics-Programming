@@ -1,5 +1,6 @@
 //Grid data stored here.
 var grid={
+  loaded: true,
   vshader: "vgrid.glsl",
   fshader: "fgrid.glsl",
   size: 1,
@@ -37,12 +38,22 @@ var grid={
 
 //Ship data stored here.
 var ship = {
+  loaded: false,
+  checkObjLoaded: function(){
+    if(ship.textures.length>0){
+      ship.loaded=true;
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+      gl.bindTexture(gl.TEXTURE_2D, ship.textures[0]);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, ship.textures[0].image);
+    }
+    else ship.loaded=false;
+  },
   vshader: "vship.glsl",
   fshader: "fship.glsl",
   blend: true,
   texCoords: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
   points: new Float32Array([-shipWidth, -shipHeight, shipWidth, -shipHeight, -shipWidth, shipHeight, shipWidth, shipWidth]),
-  texture: loadTexture("ship.gif"),
+  textures: [],
   modelMatrix: new Matrix4(),
   init: function(){
     //Get attribute locations
@@ -55,11 +66,13 @@ var ship = {
 
     ship.vertexBuffer=createArrBuffer(ship.points, gl.STATIC_DRAW);
     ship.textureBuffer=createArrBuffer(ship.texCoords, gl.STATIC_DRAW);
-    ship.texUnit=getNewTexUnit();
+    loadTexture("ship.gif", ship);
   },
   draw: function(){
-    if(player.fuel <= 0 || !checkTexLoaded(ship.texture)) return;
-    setTexture(ship, ship.texture);
+    if(player.fuel <= 0) return;
+    gl.activeTexture(ship.textures[0].unit);
+    gl.bindTexture(gl.TEXTURE_2D, ship.textures[0]);
+    setUniform(ship.program.u_Image, ship.textures[0].unitIndex, false);
     gl.uniformMatrix4fv(ship.program.u_Model, false, ship.modelMatrix.elements);
     initAttribute(ship.program.a_Position, ship.vertexBuffer, 2, gl.FLOAT, 0, 0);
     initAttribute(ship.program.a_TexCoord, ship.textureBuffer, 2, gl.FLOAT, 0, 0);
@@ -69,6 +82,7 @@ var ship = {
 
 //Individual star data is stored here. It is randomly generated.
 var stars = { 
+  loaded: true,
   vshader: "vstar.glsl",
   fshader: "fstar.glsl",
   points: function(){
@@ -115,6 +129,7 @@ var stars = {
 
 //Shooting star effect data is stored here.
 shooter={
+  loaded: true,
   vshader: "vshoot.glsl",
   fshader: "fshoot.glsl",
   points:new Float32Array([0,1,0,1.2]),
@@ -138,16 +153,22 @@ shooter={
 };
 
 planets={
+  loaded: false,
+  checkObjLoaded: function(){
+    if(planets.textures.length>planetTypes.length){
+      planets.textures=planets.textures.filter(function(n){ return n!=undefined});
+      planets.textures.forEach(function(val){
+        gl.bindTexture(gl.TEXTURE_2D, val);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, val.image);
+      });
+      planets.loaded=true;
+    }
+    else planets.loaded=false;
+  },
   vshader: "vplanet.glsl",
   fshader: "fplanet.glsl",
   blend: true,
-  textures: function(){
-    var res=[];
-    for(i=0; i<planetTypes.length; ++i){
-      res.push(loadTexture(planetTypes[i] + ".gif"));
-    }
-    return res;
-  }(),
+  textures: [],
   types: function(){
     var res=[];
     for(i=0; i<planetCount; i++){
@@ -192,14 +213,19 @@ planets={
     planets.program.u_Translation=getShaderVar(planets.program, 'u_Translation');
     planets.program.u_Image=getShaderVar(planets.program, 'u_Image');
     planets.vertexBuffer=createArrBuffer(planets.points, gl.STATIC_DRAW);
+    for(i=0; i<planetTypes.length; ++i){
+      loadTexture(planetTypes[i] + ".gif", planets);
+    }
   },
   draw: function(){
     setUniform(planets.program.u_Translation, cameraTranslation, true);
     initAttribute(planets.program.a_Position, planets.vertexBuffer, 2, gl.FLOAT, 16, 0);
     initAttribute(planets.program.a_TexCoord, planets.vertexBuffer, 2, gl.FLOAT, 16, 8);
     for(i=0; i<planetCount; ++i){
-      if(!checkTexLoaded(planets.textures[planets.types[i]])) continue;
-      setTexture(planets, planets.textures[planets.types[i]]);
+      var tex=planets.textures[planets.types[i]];
+      gl.activeTexture(tex.unit);
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      setUniform(planets.program.u_Image, tex.unit-gl.TEXTURE0, false);
       gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+2), circleDegrees+2);
     }
   }
