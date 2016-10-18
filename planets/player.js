@@ -1,8 +1,13 @@
+//Player state stored here.
 player={
   visited: [],
   money: 30,
   fuel: 100,
   planet: -1,
+
+/**
+ * Updates html elements on page to display information.
+ */
   updateHud: function(){
     var planetType=planets.types[player.planet];
     document.getElementById("money-box").innerHTML = "Credits: " + player.money.toString();
@@ -18,6 +23,10 @@ player={
     document.getElementById("planet-pop").innerHTML = (planets.populated[player.planet])?"Populated":"Not Populated";
       document.getElementById("planet-fuel").innerHTML = "Fuel: " + planets.fuel[player.planet]; 
   }, 
+
+/**
+ * Grabs planet centers to compare locations.
+ */
   init: function(){
     player.centers=[];
     for(i=0; i<planets.points.length; i+=(circleDegrees+2)*4){
@@ -25,6 +34,11 @@ player={
       player.centers.push(planets.points[i+1]);
     }
   },
+
+/**
+ * Compare ship location with planet locations, and take appropriate actions if
+ * we are on a planet.
+ */
   checkPlanet: function(){
     for(i=0; i<planetCount*2; i+=2){
       if(cameraTranslation[0].toFixed(2)==-player.centers[i].toFixed(2) && cameraTranslation[1].toFixed(2)==-player.centers[i+1].toFixed(2)){

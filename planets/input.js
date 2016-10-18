@@ -2,8 +2,11 @@
 var currentlyPressedKeys = {};
 
 /**
+ * function handleKeyDown
+ *
  * Called on key press. Enables the variable corresponding to the keycode of
- * the key that was pressed.  If it is an arrow key, change camera position.
+ * the key that was pressed.  If it is an arrow key, change camera position and
+ * update the player.
  */
 function handleKeyDown(event){
   if(currentlyPressedKeys[event.keyCode]==true) return;

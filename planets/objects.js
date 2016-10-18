@@ -18,16 +18,20 @@ var grid={
     }
     return new Float32Array([].concat.apply([], res));
   }(),
-  init: function(){
-    //Get attribute locations
-    grid.program.a_Position = getShaderVar(grid.program, 'a_Position');
 
-    //Get uniform locations.
+/**
+ * Initialize object.
+ */
+  init: function(){
+    grid.program.a_Position = getShaderVar(grid.program, 'a_Position');
     grid.program.u_Color = getShaderVar(grid.program, 'u_Color');
     grid.program.u_Translation = getShaderVar(grid.program, 'u_Translation');
-
     grid.vertexBuffer=createArrBuffer(grid.points, gl.STATIC_DRAW);
   },
+
+/**
+ * Draw object.
+ */
   draw: function(){
     setUniform(grid.program.u_Translation, cameraTranslation, true);
     setUniform(grid.program.u_Color, grid.color, true);
@@ -39,6 +43,10 @@ var grid={
 //Ship data stored here.
 var ship = {
   loaded: false,
+
+/**
+ * Checks to see if object textures have loaded.
+ */
   checkObjLoaded: function(){
     if(ship.textures.length>0){
       ship.loaded=true;
@@ -55,19 +63,23 @@ var ship = {
   points: new Float32Array([-shipWidth, -shipHeight, shipWidth, -shipHeight, -shipWidth, shipHeight, shipWidth, shipWidth]),
   textures: [],
   modelMatrix: new Matrix4(),
+
+/**
+ * Initialize object.
+ */
   init: function(){
-    //Get attribute locations
     ship.program.a_Position = getShaderVar(ship.program, 'a_Position');
     ship.program.a_TexCoord = getShaderVar(ship.program, 'a_TexCoord');   
-
-    //Get uniform locations.
     ship.program.u_Model = getShaderVar(ship.program, 'u_Model');
     ship.program.u_Image=getShaderVar(ship.program, 'u_Image');
-
     ship.vertexBuffer=createArrBuffer(ship.points, gl.STATIC_DRAW);
     ship.textureBuffer=createArrBuffer(ship.texCoords, gl.STATIC_DRAW);
     loadTexture("ship.gif", ship);
   },
+
+/**
+ * Draw object.
+ */
   draw: function(){
     if(player.fuel <= 0) return;
     gl.activeTexture(ship.textures[0].unit);
@@ -85,6 +97,10 @@ var stars = {
   loaded: true,
   vshader: "vstar.glsl",
   fshader: "fstar.glsl",
+
+/**
+ * Generate points.
+ */
   points: function(){
     var res=[];
     for(i=0; i<starCount*2; i++){
@@ -92,6 +108,10 @@ var stars = {
     }
     return new Float32Array(res);
   }(),
+
+/**
+ * Generate colors.
+ */
   colors: function(){
     var res = [];
     for(i=0; i<starCount; i++){
@@ -101,6 +121,10 @@ var stars = {
     }
     return new Float32Array(res);
   }(),
+
+/**
+ * Generate sizes.
+ */
   sizes: function(){
     var res = [];
     for(i=0; i<starCount; i++){
@@ -108,6 +132,10 @@ var stars = {
     }
     return new Float32Array(res);
   }(),
+
+/**
+ * Initialize object.
+ */
   init: function(){
     stars.program.a_Position = getShaderVar(stars.program, 'a_Position');
     stars.program.a_Size = getShaderVar(stars.program, 'a_Size');
@@ -118,6 +146,10 @@ var stars = {
     stars.colorBuffer=createArrBuffer(stars.colors, gl.STATIC_DRAW);
     stars.sizeBuffer=createArrBuffer(stars.sizes, gl.STATIC_DRAW);
   },
+
+/**
+ * Draw object.
+ */
   draw: function(){
     setUniform(stars.program.u_Translation, cameraTranslation, true);
     initAttribute(stars.program.a_Position, stars.vertexBuffer, 2, gl.FLOAT, 0, 0);
@@ -138,12 +170,20 @@ shooter={
   speed:0,
   angle:0,
   size:0,
+
+/**
+ * Initialize object.
+ */
   init: function(){
     shooter.program.a_Position = getShaderVar(shooter.program, 'a_Position');
     shooter.program.u_Color = getShaderVar(shooter.program, 'u_Color');
     shooter.program.u_Model = getShaderVar(shooter.program, 'u_Model');
     shooter.vertexBuffer=createArrBuffer(shooter.points, gl.DYNAMIC_DRAW);
   },
+
+/**
+ * Draw object.
+ */
   draw: function(){
     initAttribute(shooter.program.a_Position, shooter.vertexBuffer, 2, gl.FLOAT, 0, 0);
     setUniform(shooter.program.u_Color, shooter.color, true);
@@ -152,8 +192,13 @@ shooter={
   }
 };
 
+//Planets data stored here.
 planets={
   loaded: false,
+
+/**
+ * Checks to see if object textures have loaded.
+ */
   checkObjLoaded: function(){
     if(planets.textures.length>planetTypes.length){
       planets.textures=planets.textures.filter(function(n){ return n!=undefined});
@@ -169,6 +214,10 @@ planets={
   fshader: "fplanet.glsl",
   blend: true,
   textures: [],
+
+/**
+ * Generate planet types.
+ */
   types: function(){
     var res=[];
     for(i=0; i<planetCount; i++){
@@ -176,7 +225,10 @@ planets={
     }
     return res;
   }(),
-//  hostile: (Math.random()>.5),
+
+/**
+ * Generate fuel.
+ */
   fuel: function(){
     var res=[];
     for(i=0; i<planetCount; ++i){
@@ -184,6 +236,10 @@ planets={
     }
     return res;
   }(),
+
+/**
+ * Generate points.
+ */
   points: function(){
     var res=[];
     for(i=0; i<planetCount; i++){
@@ -207,6 +263,10 @@ planets={
     }
     return new Float32Array(res);
   }(),
+
+/**
+ * Initialize object.
+ */
   init: function(){
     planets.program.a_Position=getShaderVar(planets.program, 'a_Position');
     planets.program.a_TexCoord=getShaderVar(planets.program, 'a_TexCoord');
@@ -222,9 +282,12 @@ planets={
       if(typeInfo[planetType].populated)
         planets.populated.push(Math.random()<typeInfo[planetType].populationChance);
       else planets.populated.push(false);
-      console.log(planets.populated[i]);
     }
   },
+
+/**
+ * Draw object.
+ */
   draw: function(){
     setUniform(planets.program.u_Translation, cameraTranslation, true);
     initAttribute(planets.program.a_Position, planets.vertexBuffer, 2, gl.FLOAT, 16, 0);
