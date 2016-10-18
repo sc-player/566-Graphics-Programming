@@ -20,8 +20,8 @@ function initGL(){
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){
     canvas.height=window.innerHeight;
-    canvas.width=window.innerHeight;
-    gl.viewport(0,0,canvas.width, canvas.width);
+    canvas.width=window.innerHeight*1.2;
+    gl.viewport(0,0,canvas.width, canvas.height);
   };
   window.onresize = ResizeWindow;
   ResizeWindow();

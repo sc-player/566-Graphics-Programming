@@ -216,6 +216,14 @@ planets={
     for(i=0; i<planetTypes.length; ++i){
       loadTexture(planetTypes[i] + ".gif", planets);
     }
+    planets.populated=[];
+    for(i=0; i<planetCount; ++i){
+      var planetType=planets.types[i];
+      if(typeInfo[planetType].populated)
+        planets.populated.push(Math.random()<typeInfo[planetType].populationChance);
+      else planets.populated.push(false);
+      console.log(planets.populated[i]);
+    }
   },
   draw: function(){
     setUniform(planets.program.u_Translation, cameraTranslation, true);

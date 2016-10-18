@@ -1,6 +1,7 @@
 //Environment Configuration
 var imageDir = "img/";
 var shaderDir= "shaders/";
+var spaceImage='img/ship.gif';
 
 //Shape Configuration
 var circleDegrees = 36; 
@@ -45,4 +46,15 @@ var planetTypes=[
   "water",
   "icy",
   "fiery"
+];
+
+var typeInfo=[
+  {populated: false},
+  {populated: true, populationChance:1},
+  {populated: true, populationChance:.8},
+  {populated: true, populationChance:.8},
+  {populated: true, populationChance:.8},
+  {populated: true, populationChance:.8},
+  {populated: true, populationChance:.4},
+  {populated: true, populationChance:.4},
 ];
