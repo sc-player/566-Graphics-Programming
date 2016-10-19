@@ -1,53 +1,48 @@
 //Player state stored here.
-player={
-  visited: [],
-  money: 30,
-  fuel: 100,
-  planet: -1,
+var Player=function(p){
+  this.visited=[];
+  this.money=30;
+  this.fuel=100;
+  this.planet=-1;
+  this.planets=p;
+  this.centers=[]; 
+  for(i=0; i<this.planets.points.length; i+=(circleDegrees+2)*4){
+    this.centers.push(this.planets.points[i]);
+    this.centers.push(this.planets.points[i+1]);
+  }
+};
 
 /**
  * Updates html elements on page to display information.
  */
-  updateHud: function(){
-    var planetType=planets.types[player.planet];
-    document.getElementById("money-box").innerHTML = "Credits: " + player.money.toString();
-    document.getElementById("gas-box").innerHTML = "Fuel: " + player.fuel.toString();
-    document.getElementById("planets-box").innerHTML = "Planets left: " + (planetCount-player.visited.length).toString();
-    document.getElementById("title-box").innerHTML = (player.planet>0 ? "You are on a " + planetTypes[planetType] + " planet" : "You are in open space.");
-    document.getElementById("planet-image").src=(player.planet>0 ? planets.textures[planetType].image.src : spaceImage);
-    if(player.planet<0){
-      document.getElementById("planet-pop").innerHTML = "";
-      document.getElementById("planet-fuel").innerHTML = ""; 
-      return;
-    }
-    document.getElementById("planet-pop").innerHTML = (planets.populated[player.planet])?"Populated":"Not Populated";
-      document.getElementById("planet-fuel").innerHTML = "Fuel: " + planets.fuel[player.planet]; 
-  }, 
-
-/**
- * Grabs planet centers to compare locations.
- */
-  init: function(){
-    player.centers=[];
-    for(i=0; i<planets.points.length; i+=(circleDegrees+2)*4){
-      player.centers.push(planets.points[i]);
-      player.centers.push(planets.points[i+1]);
-    }
-  },
+Player.prototype.updateHud=function(){
+  var planetType=this.planets.types[this.planet];
+  document.getElementById("money-box").innerHTML = "Credits: " + this.money.toString();
+  document.getElementById("gas-box").innerHTML = "Fuel: " + this.fuel.toString();
+  document.getElementById("planets-box").innerHTML = "Planets left: " + (planetCount-this.visited.length).toString();
+  document.getElementById("title-box").innerHTML = (this.planet>0 ? "You are on a " + planetTypes[planetType] + " planet" : "You are in open space.");
+  document.getElementById("planet-image").src=(this.planet>0 ? this.planets.textures[planetType].image.src : spaceImage);
+  if(this.planet<0){
+    document.getElementById("planet-pop").innerHTML = "";
+    document.getElementById("planet-fuel").innerHTML = ""; 
+    return;
+  }
+  document.getElementById("planet-pop").innerHTML = (this.planets.populated[this.planet])?"Populated":"Not Populated";
+    document.getElementById("planet-fuel").innerHTML = "Fuel: " + this.planets.fuel[this.planet]; 
+}; 
 
 /**
  * Compare ship location with planet locations, and take appropriate actions if
  * we are on a planet.
  */
-  checkPlanet: function(){
-    for(i=0; i<planetCount*2; i+=2){
-      if(cameraTranslation[0].toFixed(2)==-player.centers[i].toFixed(2) && cameraTranslation[1].toFixed(2)==-player.centers[i+1].toFixed(2)){
-        player.planet=i/2;
-        player.fuel+=planets.fuel[player.planet];
-        if(!player.visited.includes(player.planet)) player.visited.push(player.planet);
-        return;
-      }
+Player.prototype.checkPlanet=function(){
+  for(i=0; i<planetCount*2; i+=2){
+    if(cameraTranslation[0].toFixed(2)==-this.centers[i].toFixed(2) && cameraTranslation[1].toFixed(2)==-this.centers[i+1].toFixed(2)){
+      this.planet=i/2;
+      this.fuel+=this.planets.fuel[this.planet];
+      if(this.visited.indexOf(this.planet) < 0) this.visited.push(this.planet);
+      return;
     }
-    player.planet=-1;
   }
-}
+  this.planet=-1;
+};

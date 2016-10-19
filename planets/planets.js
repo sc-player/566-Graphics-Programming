@@ -7,14 +7,21 @@
 //GL global references and config.
 var cameraTranslation = [0,0,0,0];
 var shouldDraw=true;
-var drawArray = [stars, grid, ship, planets, shooter];
+var drawArray = [
+  new Stars(), 
+  new Grid(), 
+  new Ship(), 
+  new Planets(), 
+  new Shooter()
+];
+var player=new Player(drawArray[3]);
 
 /* function initGL
  *
  * Creates shaders, sets event handlers, and initializes objects.
  */
 function initGL(){
-  document.onkeydown = handleKeyDown;
+  document.onkeydown = function(event){handleKeyDown(event, drawArray[2]);};
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){
     canvas.height=window.innerHeight;
@@ -23,7 +30,6 @@ function initGL(){
   };
   window.onresize = ResizeWindow;
   ResizeWindow();
-  player.init();
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
   gl.enable(gl.BLEND);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -59,30 +65,9 @@ function drawScene(){
  * Updates all animated parameters.
  */
 function animate(){
-  var shootRoll=Math.random()*1000; 
-  if(shootRoll>shootChance && shooter.speed<=0){
-    shouldDraw=true;
-    shooter.color=shooterColor;
-    shooter.speed=Math.random()/15+.09;
-    shooter.size=Math.random()*3;
-    var length=Math.random()*2+1;
-    shooter.angle=Math.random()*30-15;
-    shooter.modelMatrix.setTranslate(0, -1, 0);
-    shooter.modelMatrix.rotate(shooter.angle, 0, 0, 1); 
-    shooter.modelMatrix.scale(1, length, 1);
-    shooter.modelMatrix.translate(Math.random()*2-1, 1, 0);
-  } else if(shooter.speed>0){
-    if(shooter.modelMatrix.elements[13]+shooter.modelMatrix.elements[5]<=-1){
-      shooter.color=[0,0,0,1];
-      shooter.speed=0;
-      shooter.size=0;
-      shooter.angle=0;
-      shooter.modelMatrix.setIdentity();
-    } else{
-      shouldDraw=true;
-      shooter.modelMatrix.translate(shooter.speed*Math.sin(shooter.angle*(Math.PI/180)), -shooter.speed*Math.cos(shooter.angle*(Math.PI/180)), 0);
-    }
-  }
+  drawArray.forEach(function(val){
+    if(val.hasOwnProperty('animate')) val['animate'];
+  });
 }
 
 /**

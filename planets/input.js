@@ -8,9 +8,8 @@ var currentlyPressedKeys = {};
  * the key that was pressed.  If it is an arrow key, change camera position and
  * update the player.
  */
-function handleKeyDown(event){
+function handleKeyDown(event, ship){
   if(currentlyPressedKeys[event.keyCode]==true) return;
-  shouldDraw=true;
   currentlyPressedKeys[event.keyCode] = true;
   switch(event.keyCode){
     case 37:  //left arrow
