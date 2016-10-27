@@ -212,7 +212,7 @@ Shooter.prototype.animate= function(){
       this.angle=0;
       this.modelMatrix.setIdentity();
     } else{
-      this.modelMatrix.translate(shooter.speed*Math.sin(shooter.angle*(Math.PI/180)), -shooter.speed*Math.cos(shooter.angle*(Math.PI/180)), 0);
+      this.modelMatrix.translate(this.speed*Math.sin(this.angle*(Math.PI/180)), -this.speed*Math.cos(this.angle*(Math.PI/180)), 0);
     }
   }
 };
@@ -326,4 +326,3 @@ Planets.prototype.draw=function(){
     gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+2), circleDegrees+2);
   }
 };
-

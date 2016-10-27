@@ -10,6 +10,10 @@ var Player=function(p){
     this.centers.push(this.planets.points[i]);
     this.centers.push(this.planets.points[i+1]);
   }
+  this.view=new Matrix4();
+  this.perspective = new Matrix4();
+  this.view.setLookAt(0, 0, 5, 0, 0, -100, 0, 1, 0);
+  this.perspective.setPerspective(30, canvas.width/canvas.height, 1, 100);
 };
 
 /**

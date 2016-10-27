@@ -7,21 +7,31 @@
 //GL global references and config.
 var cameraTranslation = [0,0,0,0];
 var shouldDraw=true;
-var drawArray = [
+var drawArraySpace = [
   new Stars(), 
   new Grid(), 
   new Ship(), 
   new Planets(), 
   new Shooter()
 ];
-var player=new Player(drawArray[3]);
+
+var drawArraySurface = [
+  new Ground()
+];
+
+var drawSpaceLen = drawArraySpace.length;
+var drawSurfLen = drawArraySurface.length;
+
+var onPlanet=true;
+
+var player=new Player(drawArraySpace[3]);
 
 /* function initGL
  *
  * Creates shaders, sets event handlers, and initializes objects.
  */
 function initGL(){
-  document.onkeydown = function(event){handleKeyDown(event, drawArray[2]);};
+  document.onkeydown = function(event){handleKeyDown(event, drawArraySpace[2]);};
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){
     canvas.height=window.innerHeight;
@@ -33,18 +43,24 @@ function initGL(){
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
   gl.enable(gl.BLEND);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  drawArray.forEach(function(val){
-    val["program"]=createShaderProgram(val["vshader"], val["fshader"]);
-    gl.bindAttribLocation(val["program"], 0, 'a_Position');
-    val["init"]();
-  });
+  for(var i=0; i<drawSpaceLen; ++i){
+    drawArraySpace[i]["program"]=createShaderProgram(drawArraySpace[i]["vshader"], drawArraySpace[i]["fshader"]);
+    gl.bindAttribLocation(drawArraySpace[i]["program"], 0, 'a_Position');
+    drawArraySpace[i]["init"]();
+  };
+  for(var i=0; i<drawSurfLen; ++i){
+    drawArraySurface[i]["program"]=createShaderProgram(drawArraySurface[i]["vshader"], drawArraySurface[i]["fshader"]);
+    gl.bindAttribLocation(drawArraySurface[i]["program"], 0, 'a_Position');
+    drawArraySurface[i]["init"]();
+  };
+
 }
 
 /**
  * Will return false once everything is loaded.
  */
 function checkForLoaded(){
-  drawArray.forEach(function(val){
+  drawArraySpace.forEach(function(val){
     if(!val["loaded"]) return true;
   });
   return false;
@@ -55,19 +71,28 @@ function checkForLoaded(){
  */
 function drawScene(){
   gl.clear(gl.COLOR_BUFFER_BIT);
-  drawArray.forEach(function(val){
-    gl.useProgram(val["program"]);
-    val["draw"]();
-  });
+  if(onPlanet) for(var i=0; i<drawSurfLen; ++i){
+    gl.useProgram(drawArraySurface[i]["program"]);
+    drawArraySurface[i]["draw"]();
+  }
+  else for(var i=0; i<drawSpaceLen; ++i){
+    gl.useProgram(drawArraySpace[i]["program"]);
+    drawArraySpace[i]["draw"]();
+  }
 }
 
 /**
  * Updates all animated parameters.
  */
 function animate(){
-  drawArray.forEach(function(val){
-    if(val.hasOwnProperty('animate')) val['animate'];
-  });
+  if(onPlanet) for(var i=0; i<drawSurfLen; ++i){
+    if(drawArraySurface[i].__proto__.hasOwnProperty('animate'))
+      drawArraySurface[i]['animate']();  
+  }
+  else for(var i=0; i<drawSpaceLen; ++i){
+    if(drawArraySpace[i].__proto__.hasOwnProperty('animate'))
+      drawArraySpace[i]['animate']();  
+  }
 }
 
 /**
