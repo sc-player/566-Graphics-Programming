@@ -21,3 +21,7 @@ Ground.prototype.draw=function(){
   initAttribute(this.program.a_Position, this.vertexBuffer, 3, gl.FLOAT, 0, 0);
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 }
+
+var Cube = function(){
+  this.loaded=true;
+}

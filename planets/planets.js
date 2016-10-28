@@ -22,7 +22,7 @@ var drawArraySurface = [
 var drawSpaceLen = drawArraySpace.length;
 var drawSurfLen = drawArraySurface.length;
 
-var onPlanet=true;
+var onPlanet=false;
 
 var player=new Player(drawArraySpace[3]);
 
@@ -43,17 +43,6 @@ function initGL(){
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
   gl.enable(gl.BLEND);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  for(var i=0; i<drawSpaceLen; ++i){
-    drawArraySpace[i]["program"]=createShaderProgram(drawArraySpace[i]["vshader"], drawArraySpace[i]["fshader"]);
-    gl.bindAttribLocation(drawArraySpace[i]["program"], 0, 'a_Position');
-    drawArraySpace[i]["init"]();
-  };
-  for(var i=0; i<drawSurfLen; ++i){
-    drawArraySurface[i]["program"]=createShaderProgram(drawArraySurface[i]["vshader"], drawArraySurface[i]["fshader"]);
-    gl.bindAttribLocation(drawArraySurface[i]["program"], 0, 'a_Position');
-    drawArraySurface[i]["init"]();
-  };
-
 }
 
 /**

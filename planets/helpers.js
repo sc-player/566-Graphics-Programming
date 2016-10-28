@@ -50,7 +50,6 @@ function initAttribute(att, buffer, size, type, start, stride){
  */
 function setUniform(uniform, arr, flo){
   var res=flatten([arr]);
-  console.log(res.length);
   gl["uniform"+res.length+((flo) ? "f" : "i")+"v"](uniform, res);
 }
 

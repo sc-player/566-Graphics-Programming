@@ -23,7 +23,7 @@ function getNewTexUnit(){
  * @param (string) texName Filename of image.
  * @param (Object) object Object to add texture to.
  */
-function loadTexture(texName, object){
+function loadTexture(texName, object, arrayName){
   
  /**
   * Creates texture when image is loaded, initializes the texture, and adds it 
@@ -33,7 +33,7 @@ function loadTexture(texName, object){
   * @param (int) uni Texture unit index.
   * @param (Image) img Image object that was loaded.
   */
-  function newTexture(obj, uni, img){
+  function newTexture(obj, name, uni, img){
     tex = gl.createTexture();
     tex.unit = gl["TEXTURE"+uni];
     gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -43,12 +43,12 @@ function loadTexture(texName, object){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     tex.image=img;
     texLoaded[uni]=true;
-    obj.textures[uni]=tex;
+    obj[(name) ? name : "textures"][uni]=tex;
     obj["checkObjLoaded"]();
   }
   var unit = getNewTexUnit();
   gl.activeTexture(gl["TEXTURE"+unit]);
   var image = new Image();
   image.src=imageDir+texName;
-  image.onLoad = newTexture(object, unit, image);
+  image.onLoad = newTexture(object, arrayName, unit, image);
 }

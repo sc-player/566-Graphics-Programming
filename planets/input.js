@@ -1,6 +1,25 @@
 //What keys are we pressing?
 var currentlyPressedKeys = {};
 
+function handleKeyDown(event, ship){
+  if(onPlanet) handleKeyDownSurface(event);
+  else handleKeyDownSpace(event, ship);
+}
+
+function handleKeyDownSurface(event){
+  currentlyPressedKeys[event.keyCode]=true;
+  switch(event.keyCode){
+    case 37:
+      break;
+    case 38:
+      break;
+    case 39:
+      break;
+    case 40:
+      break;
+  }
+}
+
 /**
  * function handleKeyDown
  *
@@ -8,7 +27,7 @@ var currentlyPressedKeys = {};
  * the key that was pressed.  If it is an arrow key, change camera position and
  * update the player.
  */
-function handleKeyDown(event, ship){
+function handleKeyDownSpace(event, ship){
   if(currentlyPressedKeys[event.keyCode]==true) return;
   currentlyPressedKeys[event.keyCode] = true;
   switch(event.keyCode){

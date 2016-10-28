@@ -5,7 +5,11 @@ var Grid = function(){
   this.fshader= "fgrid.glsl";
   this.size= 1;
   this.color= [1,1,1,1];
-
+  this.program=createShaderProgram(this.vshader, this.fshader); 
+  gl.bindAttribLocation(this.program, 0, 'a_Position'); 
+  this.program.a_Position = getShaderVar(this.program, 'a_Position');
+  this.program.u_Color = getShaderVar(this.program, 'u_Color');
+  this.program.u_Translation = getShaderVar(this.program, 'u_Translation');
 /**
  * Generates vertices for the grid.
  *
@@ -18,15 +22,6 @@ var Grid = function(){
     }
     return new Float32Array([].concat.apply([], res));
   }();
-};
-
-/**
- * Initialize object.
- */
-Grid.prototype.init= function(){
-  this.program.a_Position = getShaderVar(this.program, 'a_Position');
-  this.program.u_Color = getShaderVar(this.program, 'u_Color');
-  this.program.u_Translation = getShaderVar(this.program, 'u_Translation');
   this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
 };
 
@@ -49,7 +44,16 @@ var Ship = function(){
   this.texCoords= new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
   this.points= new Float32Array([-shipWidth, -shipHeight, shipWidth, -shipHeight, -shipWidth, shipHeight, shipWidth, shipWidth]);
   this.textures= [];
-  this.modelMatrix= new Matrix4();
+  this.modelMatrix= new Matrix4();   
+  this.program=createShaderProgram(this.vshader, this.fshader); 
+  gl.bindAttribLocation(this.program, 0, 'a_Position'); 
+  this.program.a_Position = getShaderVar(this.program, 'a_Position');
+  this.program.a_TexCoord = getShaderVar(this.program, 'a_TexCoord');   
+  this.program.u_Model = getShaderVar(this.program, 'u_Model');
+  this.program.u_Image=getShaderVar(this.program, 'u_Image');
+  this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
+  this.textureBuffer=createArrBuffer(this.texCoords, gl.STATIC_DRAW);
+  loadTexture("ship.gif", this);
 };
 
 /**
@@ -63,19 +67,6 @@ Ship.prototype.checkObjLoaded= function(){
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textures[0].image);
   }
   else this.loaded=false;
-};
-
-/**
- * Initialize object.
- */
-Ship.prototype.init= function(){
-  this.program.a_Position = getShaderVar(this.program, 'a_Position');
-  this.program.a_TexCoord = getShaderVar(this.program, 'a_TexCoord');   
-  this.program.u_Model = getShaderVar(this.program, 'u_Model');
-  this.program.u_Image=getShaderVar(this.program, 'u_Image');
-  this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
-  this.textureBuffer=createArrBuffer(this.texCoords, gl.STATIC_DRAW);
-  loadTexture("ship.gif", this);
 };
 
 /**
@@ -97,7 +88,12 @@ var Stars = function(){
   this.loaded= true;
   this.vshader= "vstar.glsl";
   this.fshader= "fstar.glsl";
-
+  this.program=createShaderProgram(this.vshader, this.fshader); 
+  gl.bindAttribLocation(this.program, 0, 'a_Position'); 
+  this.program.a_Position = getShaderVar(this.program, 'a_Position');
+  this.program.a_Size = getShaderVar(this.program, 'a_Size');
+  this.program.a_Color = getShaderVar(this.program, 'a_Color');
+  this.program.u_Translation = getShaderVar(this.program, 'u_Translation');
 /**
  * Generate points.
  */
@@ -132,16 +128,6 @@ var Stars = function(){
     }
     return new Float32Array(res);
   }();
-};
-
-/**
- * Initialize object.
- */
-Stars.prototype.init=function(){
-  this.program.a_Position = getShaderVar(this.program, 'a_Position');
-  this.program.a_Size = getShaderVar(this.program, 'a_Size');
-  this.program.a_Color = getShaderVar(this.program, 'a_Color');
-  this.program.u_Translation = getShaderVar(this.program, 'u_Translation');
   this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
   this.colorBuffer=createArrBuffer(this.colors, gl.STATIC_DRAW);
   this.sizeBuffer=createArrBuffer(this.sizes, gl.STATIC_DRAW);
@@ -169,13 +155,9 @@ var Shooter=function(){
   this.modelMatrix= new Matrix4();
   this.speed=0;
   this.angle=0;
-  this.size=0;
-};
-
-/**
- * Initialize object.
- */
-Shooter.prototype.init= function(){
+  this.size=0;  
+  this.program=createShaderProgram(this.vshader, this.fshader); 
+  gl.bindAttribLocation(this.program, 0, 'a_Position'); 
   this.program.a_Position = getShaderVar(this.program, 'a_Position');
   this.program.u_Color = getShaderVar(this.program, 'u_Color');
   this.program.u_Model = getShaderVar(this.program, 'u_Model');
@@ -223,8 +205,17 @@ var Planets=function(){
   this.vshader= "vplanet.glsl";
   this.fshader= "fplanet.glsl";
   this.blend= true;
-  this.textures= [];
-
+  this.spaceTextures=[];
+  this.groundTextures=[];
+  this.program=createShaderProgram(this.vshader, this.fshader);
+  gl.bindAttribLocation(this.program, 0, 'a_Position');
+  this.program.a_Position=getShaderVar(this.program, 'a_Position');
+  this.program.a_TexCoord=getShaderVar(this.program, 'a_TexCoord');    
+  this.program.u_Translation=getShaderVar(this.program, 'u_Translation');
+  this.program.u_Image=getShaderVar(this.program, 'u_Image');
+  for(i=0; i<planetTypes.length; ++i){
+    loadTexture(planetTypes[i] + ".gif", this, "spaceTextures");
+  }
 /**
  * Generate planet types.
  */
@@ -272,43 +263,35 @@ var Planets=function(){
       }
     }
     return new Float32Array(res);
-  }();
+  }();  
+
+  this.populated=function(){
+    var res=[];
+    for(i=0; i<planetCount; ++i){
+      var planetType=this.types[i];
+      if(typeInfo[planetType].populated)
+        this.populated.push(Math.random()<typeInfo[planetType].populationChance);
+      else this.populated.push(false);
+    }
+  }
+
+
+  this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
 };
 
 /**
  * Checks to see if object textures have loaded.
  */
 Planets.prototype.checkObjLoaded=function(){
-  if(this.textures.length>planetTypes.length){
-    this.textures=this.textures.filter(function(n){ return n!=undefined});
-    this.textures.forEach(function(val){
+  if(this.spaceTextures.length>planetTypes.length){
+    this.spaceTextures=this.spaceTextures.filter(function(n){ return n!=undefined});
+    this.spaceTextures.forEach(function(val){
       gl.bindTexture(gl.TEXTURE_2D, val);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, val.image);
     });
     this.loaded=true;
   }
   else this.loaded=false;
-};
-
-/**
- * Initialize object.
- */
-Planets.prototype.init= function(){
-  this.program.a_Position=getShaderVar(this.program, 'a_Position');
-  this.program.a_TexCoord=getShaderVar(this.program, 'a_TexCoord');
-  this.program.u_Translation=getShaderVar(this.program, 'u_Translation');
-  this.program.u_Image=getShaderVar(this.program, 'u_Image');
-  this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
-  for(i=0; i<planetTypes.length; ++i){
-    loadTexture(planetTypes[i] + ".gif", this);
-  }
-  this.populated=[];
-  for(i=0; i<planetCount; ++i){
-    var planetType=this.types[i];
-    if(typeInfo[planetType].populated)
-      this.populated.push(Math.random()<typeInfo[planetType].populationChance);
-    else this.populated.push(false);
-  }
 };
 
 /**
@@ -319,7 +302,7 @@ Planets.prototype.draw=function(){
   initAttribute(this.program.a_Position, this.vertexBuffer, 2, gl.FLOAT, 16, 0);
   initAttribute(this.program.a_TexCoord, this.vertexBuffer, 2, gl.FLOAT, 16, 8);
   for(i=0; i<planetCount; ++i){
-    var tex=this.textures[this.types[i]];
+    var tex=this.spaceTextures[this.types[i]];
     gl.activeTexture(tex.unit);
     gl.bindTexture(gl.TEXTURE_2D, tex);
     setUniform(this.program.u_Image, tex.unit-gl.TEXTURE0, false);
