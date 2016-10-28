@@ -16,13 +16,13 @@ var drawArraySpace = [
 ];
 
 var drawArraySurface = [
-  new Ground()
+  new Ground(drawArraySpace[3])
 ];
 
 var drawSpaceLen = drawArraySpace.length;
 var drawSurfLen = drawArraySurface.length;
 
-var onPlanet=false;
+var onPlanet=true;
 
 var player=new Player(drawArraySpace[3]);
 

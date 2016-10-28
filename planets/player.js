@@ -25,7 +25,7 @@ Player.prototype.updateHud=function(){
   document.getElementById("gas-box").innerHTML = "Fuel: " + this.fuel.toString();
   document.getElementById("planets-box").innerHTML = "Planets left: " + (planetCount-this.visited.length).toString();
   document.getElementById("title-box").innerHTML = (this.planet>0 ? "You are on a " + planetTypes[planetType] + " planet" : "You are in open space.");
-  document.getElementById("planet-image").src=(this.planet>0 ? this.planets.spaceTextures[planetType].image.src : spaceImage);
+  document.getElementById("planet-image").src=(this.planet>0 ? this.planets.textures[planetType].image.src : spaceImage);
   if(this.planet<0){
     document.getElementById("planet-pop").innerHTML = "";
     document.getElementById("planet-fuel").innerHTML = ""; 
