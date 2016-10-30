@@ -1,7 +1,6 @@
 //Keep track of texture units.
 var texUnits=[];
-var texLoaded=[];
-
+var textures={};
 /**
  * Returns the first unused texture unit.
  *
@@ -11,10 +10,16 @@ function getNewTexUnit(){
   for(j=0; j<16; ++j){
     if(!texUnits[j]){
       texUnits[j]=true;
-      texLoaded[j]=false;
       return j;
     }
   }
+}
+
+function activateTexUnit(tex){
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.activeTexture(tex.unit);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.image);
 }
 
 /**
@@ -23,7 +28,7 @@ function getNewTexUnit(){
  * @param (string) texName Filename of image.
  * @param (Object) object Object to add texture to.
  */
-function loadTexture(texName, object, arrayName){
+function loadTexture(texName, object){
   
  /**
   * Creates texture when image is loaded, initializes the texture, and adds it 
@@ -33,22 +38,19 @@ function loadTexture(texName, object, arrayName){
   * @param (int) uni Texture unit index.
   * @param (Image) img Image object that was loaded.
   */
-  function newTexture(obj, name, uni, img){
+  function newTexture(obj, name, img){
     tex = gl.createTexture();
-    tex.unit = gl["TEXTURE"+uni];
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     tex.image=img;
-    texLoaded[uni]=true;
-    obj[(name) ? name : "textures"][uni]=tex;
+    tex.loaded=true;
+    textures[name]=tex;
     obj["checkObjLoaded"]();
   }
-  var unit = getNewTexUnit();
-  gl.activeTexture(gl["TEXTURE"+unit]);
   var image = new Image();
   image.src=imageDir+texName;
-  image.onLoad = newTexture(object, arrayName, unit, image);
+  image.onLoad = newTexture(object, texName, image);
 }

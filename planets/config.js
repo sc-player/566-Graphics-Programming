@@ -58,3 +58,6 @@ var typeInfo=[
   {populated: true, populationChance:.4},
   {populated: true, populationChance:.4},
 ];
+
+//Surface Configuration
+var surfaceSize=100;

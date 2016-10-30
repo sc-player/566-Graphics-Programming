@@ -37,6 +37,7 @@ Grid.prototype.draw= function(){
 
 //Ship data stored here.
 var Ship = function(){
+  this.textured=true;
   this.loaded=false;
   this.vshader= "vship.glsl";
   this.fshader= "fship.glsl";
@@ -53,20 +54,27 @@ var Ship = function(){
   this.program.u_Image=getShaderVar(this.program, 'u_Image');
   this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
   this.textureBuffer=createArrBuffer(this.texCoords, gl.STATIC_DRAW);
-  loadTexture("ship.gif", this);
+  this.texture="ship.gif";
+  loadTexture(this.texture, this);
 };
 
 /**
  * Checks to see if object textures have loaded.
  */
 Ship.prototype.checkObjLoaded= function(){
-  if(this.textures.length>0){
+  if(textures[this.texture].loaded){
     this.loaded=true;
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-    gl.bindTexture(gl.TEXTURE_2D, this.textures[0]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.textures[0].image);
   }
   else this.loaded=false;
+};
+
+Ship.prototype.releaseTextureUnits = function(){
+  texUnits[this.texture.unit-gl.TEXTURE0]=false;
+};
+
+Ship.prototype.gatherTextureUnits = function(){
+  textures[this.texture].unit=gl["TEXTURE"+getNewTexUnit()];
+  activateTexUnit(textures[this.texture]);
 };
 
 /**
@@ -74,9 +82,10 @@ Ship.prototype.checkObjLoaded= function(){
  */
 Ship.prototype.draw= function(){
   if(player.fuel <= 0) return;
-  gl.activeTexture(this.textures[0].unit);
-  gl.bindTexture(gl.TEXTURE_2D, this.textures[0]);
-  setUniform(this.program.u_Image, this.textures[0].unitIndex, false);
+  var tex=textures[this.texture];
+  gl.activeTexture(tex.unit);
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  setUniform(this.program.u_Image, tex.unit-gl.TEXTURE0, false);
   gl.uniformMatrix4fv(this.program.u_Model, false, this.modelMatrix.elements);
   initAttribute(this.program.a_Position, this.vertexBuffer, 2, gl.FLOAT, 0, 0);
   initAttribute(this.program.a_TexCoord, this.textureBuffer, 2, gl.FLOAT, 0, 0);
@@ -201,11 +210,11 @@ Shooter.prototype.animate= function(){
 
 //Planets data stored here.
 var Planets=function(){
+  this.textured=true;
   this.loaded=false;
   this.vshader= "vplanet.glsl";
   this.fshader= "fplanet.glsl";
   this.blend= true;
-  this.textures=[];
   this.program=createShaderProgram(this.vshader, this.fshader);
   gl.bindAttribLocation(this.program, 0, 'a_Position');
   this.program.a_Position=getShaderVar(this.program, 'a_Position');
@@ -214,7 +223,9 @@ var Planets=function(){
   this.program.u_Image=getShaderVar(this.program, 'u_Image');
   for(i=0; i<planetTypes.length; ++i){
     loadTexture(planetTypes[i] + ".gif", this, "textures");
+    loadTexture(planetTypes[i] + "-ground.gif", this, "textures");
   }
+
 /**
  * Generate planet types.
  */
@@ -249,16 +260,16 @@ var Planets=function(){
       roll = Math.random()*galaxySize-galaxySize/2;
       var centery = roll-roll%tileSize;
       res.push(centery);
-      res.push(0.125);
-      res.push(1-0.125);
+      res.push(.5);
+      res.push(.5);
       var angle = 360/circleDegrees;
       for(j=0; j<circleDegrees+1; ++j){ 
         var cos=Math.cos(angle*j*Math.PI/180);
         var sin=Math.sin(angle*j*Math.PI/180);
         res.push(centerx+planetSize*cos);
         res.push(centery+planetSize*sin);
-        res.push(.125*cos+.125);
-        res.push(.125*sin+1-.125);
+        res.push(cos/2+.5);
+        res.push(sin/2+.5);
       }
     }
     return new Float32Array(res);
@@ -281,16 +292,34 @@ var Planets=function(){
  * Checks to see if object textures have loaded.
  */
 Planets.prototype.checkObjLoaded=function(){
-  if(this.textures.length>planetTypes.length){
-    this.textures=this.textures.filter(function(n){ return n!=undefined});
-    this.textures.forEach(function(val){
-      gl.bindTexture(gl.TEXTURE_2D, val);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, val.image);
-    });
-    this.loaded=true;
+  for(var i=0; i<planetTypes.length; ++i){
+    var tex1 = textures[planetTypes[i]+".gif"];
+    var tex2 = textures[planetTypes[i]+"-ground.gif"];
+    if(tex1 && tex1.loaded && tex2 && tex2.loaded) continue;
+    this.loaded=false;
+    return;
   }
-  else this.loaded=false;
+  planetTypes.forEach(function(val){
+    gl.bindTexture(gl.TEXTURE_2D, textures[val+".gif"]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[val+".gif"].image);
+    gl.bindTexture(gl.TEXTURE_2D, textures[val+"-ground.gif"]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[val+"-ground.gif"].image);
+  });
+  this.loaded=true; 
 };
+
+Planets.prototype.releaseTextureUnits = function(){
+  planetTypes.forEach(function(val){
+    texUnits[textures[val+".gif"].unit-gl.TEXTURE0]=false;
+  });
+};
+
+Planets.prototype.gatherTextureUnits = function(){
+  planetTypes.forEach(function(val){
+    textures[val+".gif"].unit=gl["TEXTURE"+getNewTexUnit()];
+    activateTexUnit(textures[val+".gif"]);
+  });
+}
 
 /**
  * Draw object.
@@ -300,10 +329,11 @@ Planets.prototype.draw=function(){
   initAttribute(this.program.a_Position, this.vertexBuffer, 2, gl.FLOAT, 16, 0);
   initAttribute(this.program.a_TexCoord, this.vertexBuffer, 2, gl.FLOAT, 16, 8);
   for(i=0; i<planetCount; ++i){
-    var tex=this.textures[this.types[i]];
+    var tex=textures[planetTypes[this.types[i]]+".gif"];
     gl.activeTexture(tex.unit);
     gl.bindTexture(gl.TEXTURE_2D, tex);
     setUniform(this.program.u_Image, tex.unit-gl.TEXTURE0, false);
     gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+2), circleDegrees+2);
   }
 };
+

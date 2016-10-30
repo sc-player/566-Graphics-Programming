@@ -25,14 +25,41 @@ Player.prototype.updateHud=function(){
   document.getElementById("gas-box").innerHTML = "Fuel: " + this.fuel.toString();
   document.getElementById("planets-box").innerHTML = "Planets left: " + (planetCount-this.visited.length).toString();
   document.getElementById("title-box").innerHTML = (this.planet>0 ? "You are on a " + planetTypes[planetType] + " planet" : "You are in open space.");
-  document.getElementById("planet-image").src=(this.planet>0 ? this.planets.textures[planetType].image.src : spaceImage);
+  document.getElementById("planet-image").src=(this.planet>0 ? textures[planetTypes[planetType]+".gif"].image.src : spaceImage);
   if(this.planet<0){
     document.getElementById("planet-pop").innerHTML = "";
     document.getElementById("planet-fuel").innerHTML = ""; 
+    if(this.landButton){
+      document.getElementById("planet-land").removeChild(this.landButton);
+      this.landButton=null;
+    }
     return;
   }
   document.getElementById("planet-pop").innerHTML = (this.planets.populated[this.planet])?"Populated":"Not Populated";
-    document.getElementById("planet-fuel").innerHTML = "Fuel: " + this.planets.fuel[this.planet]; 
+  document.getElementById("planet-fuel").innerHTML = "Fuel: " + this.planets.fuel[this.planet]; 
+  if(this.landButton) return;
+  this.landButton = document.createElement('input');
+  this.landButton.type="button";
+  this.landButton.value=(onPlanet ? "Leave" : "Land");
+  this.landButton.onclick = function(){
+    if(onPlanet){
+      drawArraySurface.forEach(function(val){
+        if(val.textured) val["releaseTextureUnits"]();
+      });
+      drawArraySpace.forEach(function(val){
+        if(val.textured) val["gatherTextureUnits"]();
+      });
+    } else {
+      drawArraySpace.forEach(function(val){
+        if(val.textured) val["releaseTextureUnits"]();
+      });
+      drawArraySurface.forEach(function(val){
+        if(val.textured) val["gatherTextureUnits"]();
+      });
+    }
+    onPlanet=!onPlanet;
+  }
+  document.getElementById("planet-land").appendChild(this.landButton);
 }; 
 
 /**

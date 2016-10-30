@@ -22,7 +22,7 @@ var drawArraySurface = [
 var drawSpaceLen = drawArraySpace.length;
 var drawSurfLen = drawArraySurface.length;
 
-var onPlanet=true;
+var onPlanet=false;
 
 var player=new Player(drawArraySpace[3]);
 
@@ -43,6 +43,9 @@ function initGL(){
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
   gl.enable(gl.BLEND);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  drawArraySpace.forEach(function(val){
+    if(val["textured"]) val["gatherTextureUnits"]();
+  });
 }
 
 /**
