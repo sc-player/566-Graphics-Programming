@@ -10,10 +10,28 @@ var Player=function(p){
     this.centers.push(this.planets.points[i]);
     this.centers.push(this.planets.points[i+1]);
   }
+  this.worldPos=[0, 0, 0];
+  this.worldFacing=[0, 0, -1];
+  this.worldTop=[0, 1, 0];
   this.view=new Matrix4();
   this.perspective = new Matrix4();
-  this.view.setLookAt(0, 0, 5, 0, 0, -100, 0, 1, 0);
   this.perspective.setPerspective(30, canvas.width/canvas.height, 1, 100);
+};
+
+Player.prototype.updateCamera = function(){
+  if(currentlyPressedKeys[38]){
+    this.move(true);
+  }
+  if(currentlyPressedKeys[40]){
+    this.move(false);
+  }
+  this.view.setLookAt(
+    this.worldPos[0], this.worldPos[1], this.worldPos[2], 
+    this.worldPos[0] + this.worldFacing[0], 
+    this.worldPos[1] + this.worldFacing[1], 
+    this.worldPos[2] + this.worldFacing[2], 
+    this.worldTop[0], this.worldTop[1], this.worldTop[2]
+  );
 };
 
 /**
@@ -76,4 +94,20 @@ Player.prototype.checkPlanet=function(){
     }
   }
   this.planet=-1;
+};
+
+Player.prototype.rotate=function(pos){
+  
+};
+
+Player.prototype.move=function(pos){
+  if(pos){
+    this.worldPos[0]+=moveSpeed*this.worldFacing[0]*deltaTime;
+    this.worldPos[1]+=moveSpeed*this.worldFacing[1]*deltaTime;
+    this.worldPos[2]+=moveSpeed*this.worldFacing[2]*deltaTime;
+  } else {
+    this.worldPos[0]-=moveSpeed*this.worldFacing[0]*deltaTime;
+    this.worldPos[1]-=moveSpeed*this.worldFacing[1]*deltaTime;
+    this.worldPos[2]-=moveSpeed*this.worldFacing[2]*deltaTime;
+  }
 };

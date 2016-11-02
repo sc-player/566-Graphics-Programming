@@ -1,23 +1,17 @@
 //What keys are we pressing?
 var currentlyPressedKeys = {};
+var deltaTime=0.0;
+var lastFrame=0.0;
 
-function handleKeyDown(event, ship){
-  if(onPlanet) handleKeyDownSurface(event);
-  else handleKeyDownSpace(event, ship);
+function updateTime(){
+  var current = Date.now();
+  deltaTime=current-lastFrame;
+  lastFrame=current;
 }
 
-function handleKeyDownSurface(event){
+function handleKeyDown(event, ship){
+  if(!onPlanet) handleKeyDownSpace(event, ship);
   currentlyPressedKeys[event.keyCode]=true;
-  switch(event.keyCode){
-    case 37:
-      break;
-    case 38:
-      break;
-    case 39:
-      break;
-    case 40:
-      break;
-  }
 }
 
 /**
@@ -29,7 +23,6 @@ function handleKeyDownSurface(event){
  */
 function handleKeyDownSpace(event, ship){
   if(currentlyPressedKeys[event.keyCode]==true) return;
-  currentlyPressedKeys[event.keyCode] = true;
   switch(event.keyCode){
     case 37:  //left arrow
       if(cameraTranslation[0]<galaxySize/2 && player.fuel>0){

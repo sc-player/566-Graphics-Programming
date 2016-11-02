@@ -63,9 +63,12 @@ function checkForLoaded(){
  */
 function drawScene(){
   gl.clear(gl.COLOR_BUFFER_BIT);
-  if(onPlanet) for(var i=0; i<drawSurfLen; ++i){
-    gl.useProgram(drawArraySurface[i]["program"]);
-    drawArraySurface[i]["draw"]();
+  if(onPlanet){
+    player.updateCamera();
+    for(var i=0; i<drawSurfLen; ++i){
+      gl.useProgram(drawArraySurface[i]["program"]);
+      drawArraySurface[i]["draw"]();
+    }
   }
   else for(var i=0; i<drawSpaceLen; ++i){
     gl.useProgram(drawArraySpace[i]["program"]);
@@ -93,6 +96,7 @@ function animate(){
 function tick(){
   requestAnimationFrame(tick);
   player.updateHud();
+  updateTime();
   animate();
   drawScene();
 }

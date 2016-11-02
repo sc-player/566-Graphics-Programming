@@ -61,3 +61,7 @@ var typeInfo=[
 
 //Surface Configuration
 var surfaceSize=100;
+
+//Player Configuration
+var rotationSpeed=5;
+var moveSpeed=.01;
