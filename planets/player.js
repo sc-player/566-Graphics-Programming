@@ -10,27 +10,34 @@ var Player=function(p){
     this.centers.push(this.planets.points[i]);
     this.centers.push(this.planets.points[i+1]);
   }
-  this.worldPos=[0, 0, 0];
-  this.worldFacing=[0, 0, -1];
-  this.worldTop=[0, 1, 0];
+  this.worldPos=new Vector3([0, 0, 0]);
+  this.worldFacing=new Vector3([0, 0, -1]);
+  this.worldTop=new Vector3([0, 1, 0]);
+  this.currentFacingAngle = 0;
   this.view=new Matrix4();
   this.perspective = new Matrix4();
   this.perspective.setPerspective(30, canvas.width/canvas.height, 1, 100);
 };
 
 Player.prototype.updateCamera = function(){
+  if(currentlyPressedKeys[37]){
+    this.rotate(false);
+  }
   if(currentlyPressedKeys[38]){
     this.move(true);
+  }
+  if(currentlyPressedKeys[39]){
+    this.rotate(true);
   }
   if(currentlyPressedKeys[40]){
     this.move(false);
   }
   this.view.setLookAt(
-    this.worldPos[0], this.worldPos[1], this.worldPos[2], 
-    this.worldPos[0] + this.worldFacing[0], 
-    this.worldPos[1] + this.worldFacing[1], 
-    this.worldPos[2] + this.worldFacing[2], 
-    this.worldTop[0], this.worldTop[1], this.worldTop[2]
+    this.worldPos.elements[0], this.worldPos.elements[1], this.worldPos.elements[2], 
+    this.worldPos.elements[0] + this.worldFacing.elements[0], 
+    this.worldPos.elements[1] + this.worldFacing.elements[1], 
+    this.worldPos.elements[2] + this.worldFacing.elements[2], 
+    this.worldTop.elements[0], this.worldTop.elements[1], this.worldTop.elements[2]
   );
 };
 
@@ -97,17 +104,24 @@ Player.prototype.checkPlanet=function(){
 };
 
 Player.prototype.rotate=function(pos){
-  
+  if(pos){
+    this.currentFacingAngle+=rotationSpeed*Math.PI/180;
+  } else {
+    this.currentFacingAngle-=rotationSpeed*Math.PI/180;
+  }
+  this.worldFacing.elements[0] = Math.cos(this.currentFacingAngle);
+  this.worldFacing.elements[2] = Math.sin(this.currentFacingAngle);
+  this.worldFacing.normalize();
 };
 
 Player.prototype.move=function(pos){
   if(pos){
-    this.worldPos[0]+=moveSpeed*this.worldFacing[0]*deltaTime;
-    this.worldPos[1]+=moveSpeed*this.worldFacing[1]*deltaTime;
-    this.worldPos[2]+=moveSpeed*this.worldFacing[2]*deltaTime;
+    this.worldPos.elements[0]+=moveSpeed*this.worldFacing.elements[0]*deltaTime;
+    this.worldPos.elements[1]+=moveSpeed*this.worldFacing.elements[1]*deltaTime;
+    this.worldPos.elements[2]+=moveSpeed*this.worldFacing.elements[2]*deltaTime;
   } else {
-    this.worldPos[0]-=moveSpeed*this.worldFacing[0]*deltaTime;
-    this.worldPos[1]-=moveSpeed*this.worldFacing[1]*deltaTime;
-    this.worldPos[2]-=moveSpeed*this.worldFacing[2]*deltaTime;
+    this.worldPos.elements[0]-=moveSpeed*this.worldFacing.elements[0]*deltaTime;
+    this.worldPos.elements[1]-=moveSpeed*this.worldFacing.elements[1]*deltaTime;
+    this.worldPos.elements[2]-=moveSpeed*this.worldFacing.elements[2]*deltaTime;
   }
 };
