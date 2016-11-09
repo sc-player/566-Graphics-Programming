@@ -10,28 +10,39 @@ var shouldDraw=true;
 var drawArraySpace = [
   new Stars(), 
   new Grid(), 
-  new Ship(), 
   new Planets(), 
+  new Ship(), 
   new Shooter()
 ];
 
+var planets=drawArraySpace[2];
+var ship=drawArraySpace[3];
+
 var drawArraySurface = [
-  new Ground(drawArraySpace[3])
+  new Ground(planets),
+  new SurfaceShip(),
+  new FuelDepot(),
+  new Armory(),
+  new TradingPost()
 ];
+for(i=1; i<drawArraySurface.length; ++i){
+  drawArraySurface[i].program=drawArraySurface[2].program;
+  if(i==1) ++i;
+}
 
 var drawSpaceLen = drawArraySpace.length;
 var drawSurfLen = drawArraySurface.length;
 
 var onPlanet=false;
 
-var player=new Player(drawArraySpace[3]);
+var player=new Player(planets);
 
 /* function initGL
  *
  * Creates shaders, sets event handlers, and initializes objects.
  */
 function initGL(){
-  document.onkeydown = function(event){handleKeyDown(event, drawArraySpace[2]);};
+  document.onkeydown = function(event){handleKeyDown(event, ship);};
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){
     canvas.height=window.innerHeight;
@@ -62,7 +73,7 @@ function checkForLoaded(){
  * Clears the background and draws each object.
  */
 function drawScene(){
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   if(onPlanet){
     player.updateCamera();
     for(var i=0; i<drawSurfLen; ++i){

@@ -16,10 +16,15 @@ function getNewTexUnit(){
 }
 
 function activateTexUnit(tex){
+  tex.unit=gl["TEXTURE"+getNewTexUnit()];
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-  gl.activeTexture(tex.unit);
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.image);
+  gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
+  if(tex.cube){
+    for(i=0; i<tex.images.length; ++i){
+      gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.images[i]); 
+    }
+  }
+  else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.image);
 }
 
 /**
@@ -44,7 +49,7 @@ function loadTexture(texName, object){
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); 
     tex.image=img;
     tex.loaded=true;
     textures[name]=tex;
@@ -52,5 +57,43 @@ function loadTexture(texName, object){
   }
   var image = new Image();
   image.src=imageDir+texName;
-  image.onLoad = newTexture(object, texName, image);
+  image.onLoad = newTexture(object, texName, image); 
+}
+ 
+function loadCubeMap(texName, texNames, object){ 
+ /**
+  * Creates texture when image is loaded, initializes the texture, and adds it 
+  * to the object.
+  *
+  * @param (Object) obj Object to add texture to.
+  * @param (int) uni Texture unit index.
+  * @param (Image) img Image object that was loaded.
+  */
+  function newCubeMap(obj, name, names, img, i){
+    if(!textures[name]){
+      tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST); 
+      tex.images=[];
+      tex.cube=true;
+      textures[name]=tex;
+    } else{
+      tex=textures[name];
+    }
+    tex.images[i]=img;
+    if(tex.images.length>5){
+      tex.loaded=true;
+      obj["checkObjLoaded"]();
+    }
+  }
+  var i=0;
+  texNames.forEach(function(val){
+    var image = new Image();
+    image.src=imageDir+val;
+    image.onLoad = newCubeMap(object, texName, texNames, image, i); 
+    ++i;
+  });
 }

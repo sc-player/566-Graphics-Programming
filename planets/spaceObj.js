@@ -44,7 +44,6 @@ var Ship = function(){
   this.blend= true;
   this.texCoords= new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
   this.points= new Float32Array([-shipWidth, -shipHeight, shipWidth, -shipHeight, -shipWidth, shipHeight, shipWidth, shipWidth]);
-  this.textures= [];
   this.modelMatrix= new Matrix4();   
   this.program=createShaderProgram(this.vshader, this.fshader); 
   gl.bindAttribLocation(this.program, 0, 'a_Position'); 
@@ -55,25 +54,37 @@ var Ship = function(){
   this.vertexBuffer=createArrBuffer(this.points, gl.STATIC_DRAW);
   this.textureBuffer=createArrBuffer(this.texCoords, gl.STATIC_DRAW);
   this.texture="ship.gif";
+  this.surfaceTexture="ship-surface";
+  this.surfaceTextures=[
+    "ship-right.gif",
+    "ship-left.gif",
+    "ship-top.gif",
+    "ship-bottom.gif",
+    "ship-back.gif",
+    "ship-front.gif"
+  ];
   loadTexture(this.texture, this);
+//  loadCubeMap(this.surfaceTexture, this.surfaceTextures, this);
 };
 
 /**
  * Checks to see if object textures have loaded.
  */
 Ship.prototype.checkObjLoaded= function(){
-  if(textures[this.texture].loaded){
-    this.loaded=true;
-  }
-  else this.loaded=false;
+  this.loaded = 
+    textures[this.texture]        && 
+    textures[this.texture].loaded // && 
+//    textures[this.surfaceTexture] && 
+//    textures[this.surfaceTexture].loaded;
 };
 
 Ship.prototype.releaseTextureUnits = function(){
-  texUnits[this.texture.unit-gl.TEXTURE0]=false;
+  texUnits[textures[this.texture].unit-gl.TEXTURE0]=false;
+//  activateTexUnit(textures[this.surfaceTexture]);
 };
 
 Ship.prototype.gatherTextureUnits = function(){
-  textures[this.texture].unit=gl["TEXTURE"+getNewTexUnit()];
+//  texUnits[textures[this.surfaceTexture].unit-gl.TEXTURE0]=false;
   activateTexUnit(textures[this.texture]);
 };
 
@@ -222,8 +233,8 @@ var Planets=function(){
   this.program.u_Translation=getShaderVar(this.program, 'u_Translation');
   this.program.u_Image=getShaderVar(this.program, 'u_Image');
   for(i=0; i<planetTypes.length; ++i){
-    loadTexture(planetTypes[i] + ".gif", this, "textures");
-    loadTexture(planetTypes[i] + "-ground.gif", this, "textures");
+    loadTexture(planetTypes[i] + ".gif", this);
+    loadTexture(planetTypes[i] + "-ground.gif", this);
   }
 
 /**
@@ -299,12 +310,6 @@ Planets.prototype.checkObjLoaded=function(){
     this.loaded=false;
     return;
   }
-  planetTypes.forEach(function(val){
-    gl.bindTexture(gl.TEXTURE_2D, textures[val+".gif"]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[val+".gif"].image);
-    gl.bindTexture(gl.TEXTURE_2D, textures[val+"-ground.gif"]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[val+"-ground.gif"].image);
-  });
   this.loaded=true; 
 };
 
@@ -316,7 +321,6 @@ Planets.prototype.releaseTextureUnits = function(){
 
 Planets.prototype.gatherTextureUnits = function(){
   planetTypes.forEach(function(val){
-    textures[val+".gif"].unit=gl["TEXTURE"+getNewTexUnit()];
     activateTexUnit(textures[val+".gif"]);
   });
 }

@@ -10,13 +10,16 @@ var Player=function(p){
     this.centers.push(this.planets.points[i]);
     this.centers.push(this.planets.points[i+1]);
   }
+  this.startPosition();
+  this.perspective = (new Matrix4()).setPerspective(30, canvas.width/canvas.height, 1, 100);
+};
+
+Player.prototype.startPosition = function(){
   this.worldPos=new Vector3([0, 0, 0]);
-  this.worldFacing=new Vector3([0, 0, -1]);
+  this.worldFacing=new Vector3([1, 0, 0]);
   this.worldTop=new Vector3([0, 1, 0]);
   this.currentFacingAngle = 0;
   this.view=new Matrix4();
-  this.perspective = new Matrix4();
-  this.perspective.setPerspective(30, canvas.width/canvas.height, 1, 100);
 };
 
 Player.prototype.updateCamera = function(){
@@ -74,6 +77,9 @@ Player.prototype.updateHud=function(){
       drawArraySpace.forEach(function(val){
         if(val.textured) val["gatherTextureUnits"]();
       });
+      gl.disable(gl.DEPTH_TEST);
+      gl.enable(gl.BLEND);
+      player.startPosition();  
     } else {
       drawArraySpace.forEach(function(val){
         if(val.textured) val["releaseTextureUnits"]();
@@ -81,6 +87,8 @@ Player.prototype.updateHud=function(){
       drawArraySurface.forEach(function(val){
         if(val.textured) val["gatherTextureUnits"]();
       });
+      gl.disable(gl.BLEND);
+      gl.enable(gl.DEPTH_TEST);
     }
     onPlanet=!onPlanet;
   }
@@ -105,9 +113,9 @@ Player.prototype.checkPlanet=function(){
 
 Player.prototype.rotate=function(pos){
   if(pos){
-    this.currentFacingAngle+=rotationSpeed*Math.PI/180;
+    this.currentFacingAngle+=rotationSpeed*Math.PI/180*deltaTime;
   } else {
-    this.currentFacingAngle-=rotationSpeed*Math.PI/180;
+    this.currentFacingAngle-=rotationSpeed*Math.PI/180*deltaTime;
   }
   this.worldFacing.elements[0] = Math.cos(this.currentFacingAngle);
   this.worldFacing.elements[2] = Math.sin(this.currentFacingAngle);

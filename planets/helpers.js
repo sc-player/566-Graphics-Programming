@@ -89,6 +89,13 @@ function createArrBuffer(data, draw){
   return res;
 }
 
+function createEleBuffer(data, draw){
+  var res = createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, res);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, draw);
+  return res;
+}
+
 /**
  * Creates a buffer and checks if it completes.
  *
