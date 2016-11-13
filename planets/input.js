@@ -27,7 +27,7 @@ function handleKeyDownSpace(event, ship){
     case 37:  //left arrow
       if(cameraTranslation[0]<galaxySize/2 && player.fuel>0){
         cameraTranslation[0]+=tileSize;
-        ship.modelMatrix.setRotate(0, 0, 0, 1);
+        ship.shaderVars.u_Model.data.setRotate(0, 0, 0, 1);
         player.fuel--;
         player.checkPlanet();
       }
@@ -35,7 +35,7 @@ function handleKeyDownSpace(event, ship){
     case 38:  //up arrow
       if(cameraTranslation[1]>-galaxySize/2 && player.fuel>0){
         cameraTranslation[1]-=tileSize;
-        ship.modelMatrix.setRotate(90, 0, 0, 1);
+        ship.shaderVars.u_Model.data.setRotate(90, 0, 0, 1);
         player.fuel--;
         player.checkPlanet();
       }
@@ -43,8 +43,8 @@ function handleKeyDownSpace(event, ship){
     case 39:  //right arrow
       if(cameraTranslation[0]>-galaxySize/2 && player.fuel>0){
         cameraTranslation[0]-=tileSize;
-        ship.modelMatrix.setRotate(180, 0, 0, 1);
-        ship.modelMatrix.rotate(180, 1, 0, 0);
+        ship.shaderVars.u_Model.data.setRotate(180, 0, 0, 1);
+        ship.shaderVars.u_Model.data.rotate(180, 1, 0, 0);
         player.fuel--;
         player.checkPlanet();
       }
@@ -52,7 +52,7 @@ function handleKeyDownSpace(event, ship){
     case 40:  //down arrow
       if(cameraTranslation[1]<galaxySize/2 && player.fuel>0){
         cameraTranslation[1]+=tileSize;
-        ship.modelMatrix.setRotate(-90, 0, 0, 1);
+        ship.shaderVars.u_Model.data.setRotate(-90, 0, 0, 1);
         player.fuel--;
         player.checkPlanet();
       }

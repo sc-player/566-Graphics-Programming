@@ -1,124 +1,125 @@
-/**
- * Philip Strachan
- * planets.js
- * Creates a space scene that you can move around in a 2d space. 
- */
-
-//GL global references and config.
-var cameraTranslation = [0,0,0,0];
-var shouldDraw=true;
-var drawArraySpace = [
-  new Stars(), 
-  new Grid(), 
-  new Planets(), 
-  new Ship(), 
-  new Shooter()
-];
-
-var planets=drawArraySpace[2];
-var ship=drawArraySpace[3];
-
-var drawArraySurface = [
-  new Ground(planets),
-  new SurfaceShip(),
-  new FuelDepot(),
-  new Armory(),
-  new TradingPost()
-];
-for(i=1; i<drawArraySurface.length; ++i){
-  drawArraySurface[i].program=drawArraySurface[2].program;
-  if(i==1) ++i;
-}
-
-var drawSpaceLen = drawArraySpace.length;
-var drawSurfLen = drawArraySurface.length;
-
-var onPlanet=false;
-
-var player=new Player(planets);
-
-/* function initGL
- *
- * Creates shaders, sets event handlers, and initializes objects.
- */
-function initGL(){
-  document.onkeydown = function(event){handleKeyDown(event, ship);};
-  document.onkeyup = handleKeyUp;
-  function ResizeWindow(){
-    canvas.height=window.innerHeight;
-    canvas.width=window.innerHeight*1.2;
-    gl.viewport(0,0,canvas.width, canvas.height);
-  };
-  window.onresize = ResizeWindow;
-  ResizeWindow();
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-  gl.enable(gl.BLEND);
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  drawArraySpace.forEach(function(val){
-    if(val["textured"]) val["gatherTextureUnits"]();
-  });
-}
+//Planets data stored here.
+var Planets=function(){
+  this.textured=true;
+  this.loaded=false;
+  this.vshader= "vplanet.glsl";
+  this.fshader= "fplanet.glsl";
+  for(i=0; i<planetTypes.length; ++i){
+    loadTexture(planetTypes[i] + ".gif", this);
+    loadTexture(planetTypes[i] + "-ground.gif", this);
+  }
 
 /**
- * Will return false once everything is loaded.
+ * Generate planet types.
  */
-function checkForLoaded(){
-  drawArraySpace.forEach(function(val){
-    if(!val["loaded"]) return true;
-  });
-  return false;
-}
-
-/**
- * Clears the background and draws each object.
- */
-function drawScene(){
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  if(onPlanet){
-    player.updateCamera();
-    for(var i=0; i<drawSurfLen; ++i){
-      gl.useProgram(drawArraySurface[i]["program"]);
-      drawArraySurface[i]["draw"]();
+  this.types=function(){
+    var res=[];
+    for(i=0; i<planetCount; i++){
+      res.push(Math.floor(Math.random()*planetTypes.length));
     }
+    return res;
+  }();
+
+/**
+ * Generate fuel.
+ */
+  this.fuel=function(){
+    var res=[];
+    for(i=0; i<planetCount; ++i){
+      res.push(Math.round(Math.random()*5+10));
+    }
+    return res;
+  }();
+
+/**
+ * Generate points.
+ */
+    
+  
+  this.populated=function(types){
+    var res=[];
+    for(var i=0; i<planetCount; ++i){
+      var planetType=types[i];
+      if(typeInfo[planetType].populated)
+        res.push(Math.random()<typeInfo[planetType].populationChance);
+      else res.push(false);
+    }
+    return res;
+  }(this.types);
+  this.shaderVars= new ShaderVars(
+    ["a_Position", "a_TexCoord", "u_Translation", "u_Image"],
+    function(){
+      var res=[];
+      var texRes=[];
+      for(i=0; i<planetCount; i++){
+        var roll = Math.random()*galaxySize-galaxySize/2;
+        var centerx = roll-roll%tileSize;
+        res.push(centerx);
+        roll = Math.random()*galaxySize-galaxySize/2;
+        var centery = roll-roll%tileSize;
+        res.push(centery);
+        texRes.push(.5);
+        texRes.push(.5);
+        var angle = 360/circleDegrees;
+        for(j=0; j<circleDegrees+1; ++j){
+          var cos=Math.cos(angle*j*Math.PI/180);
+          var sin=Math.sin(angle*j*Math.PI/180);
+          res.push(centerx+planetSize*cos);
+          res.push(centery+planetSize*sin);
+          texRes.push(cos/2+.5);
+          texRes.push(sin/2+.5);
+        } 
+      } 
+      return [new Float32Array(res), new Float32Array(texRes)];
+    }().concat([cameraTranslation, null]), [2, 2, false, false],
+    [[false, false, false, true], [false, false, false, false]] 
+  );
+  player.planets=this;
+  for(i=0; i<this.shaderVars.a_Position.data.length; i+=(circleDegrees+2)*2){
+    player.centers.push(this.shaderVars.a_Position.data[i]);
+    player.centers.push(this.shaderVars.a_Position.data[i+1]); 
   }
-  else for(var i=0; i<drawSpaceLen; ++i){
-    gl.useProgram(drawArraySpace[i]["program"]);
-    drawArraySpace[i]["draw"]();
+  this.blend=true;
+  this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
+};
+
+/**
+ * Checks to see if object textures have loaded.
+ */
+Planets.prototype.checkObjLoaded=function(){
+  for(var i=0; i<planetTypes.length; ++i){
+    var tex1 = textures[planetTypes[i]+".gif"];
+    var tex2 = textures[planetTypes[i]+"-ground.gif"];
+    if(tex1 && tex1.loaded && tex2 && tex2.loaded) continue;
+    this.loaded=false;
+    return;
   }
+  this.loaded=true;
+};
+
+Planets.prototype.releaseTextureUnits = function(){
+  planetTypes.forEach(function(val){
+    texUnits[textures[val+".gif"].unit-gl.TEXTURE0]=false;
+  });
+};
+
+Planets.prototype.gatherTextureUnits = function(){
+  planetTypes.forEach(function(val){
+    activateTexUnit(this.program, val+".gif");
+  }, this);
 }
 
 /**
- * Updates all animated parameters.
+ * Draw object.
  */
-function animate(){
-  if(onPlanet) for(var i=0; i<drawSurfLen; ++i){
-    if(drawArraySurface[i].__proto__.hasOwnProperty('animate'))
-      drawArraySurface[i]['animate']();  
+Planets.prototype.draw=function(){
+  setAllShaderVars(this);
+  for(i=0; i<planetCount; ++i){
+    var tex=textures[planetTypes[this.types[i]]+".gif"];
+    gl.activeTexture(tex.unit);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    setUniform(this.program.u_Image, tex.unit-gl.TEXTURE0, false);
+    gl.drawArrays(gl.TRIANGLE_FAN, i*(circleDegrees+2), circleDegrees+2);
   }
-  else for(var i=0; i<drawSpaceLen; ++i){
-    if(drawArraySpace[i].__proto__.hasOwnProperty('animate'))
-      drawArraySpace[i]['animate']();  
-  }
-}
+};
 
-/**
- * Main loop
- */
-function tick(){
-  requestAnimationFrame(tick);
-  player.updateHud();
-  updateTime();
-  animate();
-  drawScene();
-}
-
-/**
- *  Entry point.
- *   Initialization
- *   Begin loop
- */
-function main(){
-  initGL(); 
-  while(checkForLoaded()){}
-  tick();
-}

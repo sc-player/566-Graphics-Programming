@@ -1,15 +1,10 @@
 //Player state stored here.
-var Player=function(p){
+var Player=function(){
   this.visited=[];
   this.money=30;
   this.fuel=100;
   this.planet=-1;
-  this.planets=p;
   this.centers=[]; 
-  for(i=0; i<this.planets.points.length; i+=(circleDegrees+2)*4){
-    this.centers.push(this.planets.points[i]);
-    this.centers.push(this.planets.points[i+1]);
-  }
   this.startPosition();
   this.perspective = (new Matrix4()).setPerspective(30, canvas.width/canvas.height, 1, 100);
 };

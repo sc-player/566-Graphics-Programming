@@ -15,8 +15,10 @@ function getNewTexUnit(){
   }
 }
 
-function activateTexUnit(tex){
-  tex.unit=gl["TEXTURE"+getNewTexUnit()];
+function activateTexUnit(uni, text){
+  var tex=textures[text];
+  tex.unit=gl["TEXTURE"+getNewTexUnit()]; 
+  uni.data=tex.unit-gl.TEXTURE0;
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   if(tex.cube){
@@ -43,7 +45,7 @@ function loadTexture(texName, object){
   * @param (int) uni Texture unit index.
   * @param (Image) img Image object that was loaded.
   */
-  function newTexture(obj, name, img){
+  function newTexture(name, img, obj){
     tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
@@ -57,7 +59,7 @@ function loadTexture(texName, object){
   }
   var image = new Image();
   image.src=imageDir+texName;
-  image.onLoad = newTexture(object, texName, image); 
+  image.onload = function(){newTexture(texName, image, object);};
 }
  
 function loadCubeMap(texName, texNames, object){ 
@@ -93,7 +95,9 @@ function loadCubeMap(texName, texNames, object){
   texNames.forEach(function(val){
     var image = new Image();
     image.src=imageDir+val;
-    image.onLoad = newCubeMap(object, texName, texNames, image, i); 
-    ++i;
+    image.onload = function(){
+      newCubeMap(object, texName, texNames, image, i); 
+      ++i;
+    };
   });
 }
