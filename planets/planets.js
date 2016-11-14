@@ -1,5 +1,6 @@
 //Planets data stored here.
 var Planets=function(){
+  WObject.call(this, "planets");
   this.types=function(){
     var res=[];
     for(i=0; i<planetCount; i++){
@@ -26,7 +27,6 @@ var Planets=function(){
     return res;
   }(this.types);
   player.planets=this;
-  WObject.call(this, "planets");
   for(i=0; i<this.shaderVars.a_Position.data.length; i+=(circleDegrees+2)*2){
     player.centers.push(this.shaderVars.a_Position.data[i]);
     player.centers.push(this.shaderVars.a_Position.data[i+1]); 

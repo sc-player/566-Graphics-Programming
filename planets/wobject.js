@@ -19,11 +19,17 @@ var WObject = function(name){
 WObject.prototype.draw = function(){
   setAllShaderVars(this);
   if(this.textured){
-    var tex=textures[this.textures[0]];
+    var tex=textures[this.getCurrentTexture()];
     gl.activeTexture(tex.unit);
     gl.bindTexture(gl.TEXTURE_2D, tex);
   }
-  gl.drawArrays(this.drawType, 0, this.shaderVars.a_Position.data.length/2);
+  gl.drawArrays(this.drawType, 0, 
+    this.shaderVars.a_Position.data.length/this.shaderVars.a_Position.size
+  );
+};
+
+WObject.prototype.getCurrentTexture = function(){
+  return this.textures[0];
 };
 
 WObject.prototype.checkObjLoaded = function(){

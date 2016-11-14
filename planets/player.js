@@ -132,3 +132,8 @@ Player.prototype.move=function(pos){
     this.worldPos.elements[2]-=moveSpeed*this.worldFacing.elements[2]*deltaTime;
   }
 };
+
+Player.prototype.getPTypeIndex = function(){
+  if(this.planet<0) return -1;
+  else return this.planets.types[this.planet];
+};

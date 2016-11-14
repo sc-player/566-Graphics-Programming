@@ -1,64 +1,31 @@
-var object3d = {
-  points: new Float32Array([
-    1,  1,  1,
-   -1,  1,  1,
-   -1, -1,  1, 
-    1, -1,  1, 
-    1, -1, -1,
-    1,  1, -1,
-   -1,  1, -1,
-   -1, -1, -1,
-    0,  0,  1,
-    1,  0,  0,
-    0,  1,  0,
-    0, -1,  0,
-    -1, 0,  0,
-    0,  0, -1,
-    0,  0,  0
-  ]),
-  cube: new Uint8Array([
-    0, 1, 2,   0, 2, 3,
-    0, 3, 4,   0, 4, 5,
-    0, 5, 6,   0, 6, 1,
-    1, 6, 7,   1, 7, 2,
-    7, 4, 3,   7, 3, 2,
-    4, 7, 6,   4, 6, 5  
-  ]),
-  pyramid: new Uint8Array([
-    7, 4, 3,   7, 3, 2,
-    7, 3, 10,  7, 2, 10,
-    3, 4, 10,  3, 2, 10 
-  ]),
+var Object3d = function(name){
+  WObject.call(this, name);
+  this.drawType=gl.TRIANGLES;
+  var obj = JSON.parse(loadExternalFile(name+".json"));
+  points= new Float32Array(obj.points);
+  cube: new Uint8Array(obj.cube);
+  pyramid: new Uint8Array(obj.pyramid);
 };
 
-object3d.vertexBuffer=createBuff(gl.ARRAY_BUFFER, object3d.points);
-object3d.cubeBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.cube);
-object3d.pyramidBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.pyramid);
+//object3d.vertexBuffer=createBuff(gl.ARRAY_BUFFER, object3d.points);
+//object3d.cubeBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.cube);
+//object3d.pyramidBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.pyramid);
 
 var Ground = function(p){
   WObject.call(this, "ground");
+  this.drawType=gl.TRIANGLE_STRIP;
   this.planets=p;
 };
 
 Ground.prototype = Object.create(WObject.prototype);
 Ground.prototype.constructor = Ground;
 
-Ground.prototype.releaseTextureUnits = function(){
-  texUnits[textures[planetTypes[this.planets.types[player.planet]]+"-ground.gif"].unit-gl.TEXTURE0]=false;
+Ground.prototype.getCurrentTexture = function(){
+  return this.textures[player.getPTypeIndex()];
 };
 
 Ground.prototype.gatherTextureUnits = function(){
-  activateTexUnit(this.program,
-    planetTypes[this.planets.types[player.planet]]+"-ground.gif");
-};
-
-Ground.prototype.draw=function(){
-  var tex=textures[planetTypes[this.planets.types[player.planet]] + "-ground.gif"];
-  setAllShaderVars(this);
-  setUniform(this.program.u_Image, tex.unit-gl.TEXTURE0, false);
-  gl.activeTexture(tex.unit);
-  gl.bindTexture(gl.TEXTURE_2D, tex);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  activateTexUnit(this.program, this.textures[player.getPTypeIndex()]);
 };
 
 /*var SurfaceShip = function(){
