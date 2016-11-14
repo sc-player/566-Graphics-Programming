@@ -55,6 +55,28 @@ var ShaderVars = function(vars){
   }
 }
 
+function setAllShaderVars(obj){
+  for(var v in obj.shaderVars){ 
+    if(obj.shaderVars[v].texture) setUniform(obj.program[v], 
+      textures[obj.textures[0]].unit-gl.TEXTURE0, false);
+    else if(isUniform(v)){
+      if(obj.shaderVars[v].matrix) gl.uniformMatrix4fv(
+        obj.program[v], false, obj.shaderVars[v].data.elements
+      );
+      else setUniform(obj.program[v], obj.shaderVars[v].data, 
+        obj.shaderVars[v].type===gl.FLOAT
+      );
+    }
+    else initAttribute(
+      obj.program[v], obj.shaderVars[v].buffer, 
+      obj.shaderVars[v].size, obj.shaderVars[v].type, 
+      obj.shaderVars[v].stride, obj.shaderVars[v].offset
+    );
+  }
+}
+
+
+
 /**
  * Load both shaders and create the program object. 
  * @param (string) vert Vertex shader filename.
@@ -85,25 +107,6 @@ function loadExternalFile(filepath){
   xhr.open('GET', filepath, false);
   xhr.send(null);
   return xhr.responseText;
-}
-
-function setAllShaderVars(obj){
-  for(var v in obj.shaderVars){
-    if(obj.shaderVars[v].texture) continue;
-    if(isUniform(v)){
-      if(obj.shaderVars[v].matrix) gl.uniformMatrix4fv(
-        obj.program[v], false, obj.shaderVars[v].data.elements
-      );
-      else setUniform(obj.program[v], obj.shaderVars[v].data, 
-        obj.shaderVars[v].type===gl.FLOAT
-      );
-    }
-    else initAttribute(
-      obj.program[v], obj.shaderVars[v].buffer, 
-      obj.shaderVars[v].size, obj.shaderVars[v].type, 
-      obj.shaderVars[v].stride, obj.shaderVars[v].offset
-    );
-  }
 }
 
 /**

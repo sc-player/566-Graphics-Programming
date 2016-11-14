@@ -36,16 +36,12 @@ object3d.cubeBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.cube);
 object3d.pyramidBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.pyramid);
 
 var Ground = function(p){
-  var obj = JSON.parse(loadExternalFile(objDir+"ground.json"));
-  this.loaded= obj.loaded;
-  this.textured=obj.textured;
-  this.vshader= obj.vshader;
-  this.fshader= obj.fshader;
-  this.blend=obj.blend;
-  this.shaderVars=new ShaderVars(obj.vars);
-  this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
+  WObject.call(this, "ground");
   this.planets=p;
 };
+
+Ground.prototype = Object.create(WObject.prototype);
+Ground.prototype.constructor = Ground;
 
 Ground.prototype.releaseTextureUnits = function(){
   texUnits[textures[planetTypes[this.planets.types[player.planet]]+"-ground.gif"].unit-gl.TEXTURE0]=false;

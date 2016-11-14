@@ -1,1 +1,1 @@
-{"loaded": true, "vshader": "vgrid.glsl", "fshader": "fgrid.glsl", "vars": {"attrib": ["a_Position", "u_Color", "u_Translation"], "data": ["gridPoints", [1, 1, 1, 1], [0, 0, 0, 0]], "sizes":[2, null, null]}}
+{"vshader": "vgrid.glsl", "fshader": "fgrid.glsl", "vars": {"attrib": ["a_Position", "u_Color", "u_Translation"], "data": ["gridPoints", [1, 1, 1, 1], [0, 0, 0, 0]], "sizes":[2, null, null]}}

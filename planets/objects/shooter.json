@@ -1,1 +1,1 @@
-{"loaded": true, "vshader": "vshoot.glsl", "fshader": "fshoot.glsl", "vars": {"attrib": ["a_Position", "u_Model", "u_Color"], "data": ["shootPoints", "matrix", [1, 1, 1, 1]], "sizes":[2, null, null]}}
+{"vshader": "vshoot.glsl", "fshader": "fshoot.glsl", "vars": {"attrib": ["a_Position", "u_Model", "u_Color"], "data": ["shootPoints", "matrix", [1, 1, 1, 1]], "sizes":[2, null, null]}}

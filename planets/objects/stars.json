@@ -1,1 +1,1 @@
-{"loaded": true, "vshader": "vstar.glsl", "fshader": "fstar.glsl", "vars": {"attrib": ["a_Position", "a_Color", "a_Size", "u_Translation"], "data": ["starPoints", "starColors", "starSizes", [0,0,0,0]], "sizes":[2, 3, 1, null]}}
+{"vshader": "vstar.glsl", "fshader": "fstar.glsl", "vars": {"attrib": ["a_Position", "a_Color", "a_Size", "u_Translation"], "data": ["starPoints", "starColors", "starSizes", [0,0,0,0]], "sizes":[2, 3, 1, null]}}

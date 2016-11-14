@@ -1,59 +1,32 @@
 //Grid data stored here.
 var Grid = function(){
-  var obj = JSON.parse(loadExternalFile(objDir+"grid.json"));
-  this.loaded= obj.loaded;
-  this.vshader= obj.vshader;
-  this.fshader= obj.fshader;
-  this.shaderVars=new ShaderVars(obj.vars);
-  this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars); 
+  WObject.call(this, "grid"); 
+  this.drawType=gl.LINES;
 };
 
-/**
- * Draw object.
- */
-Grid.prototype.draw= function(){
-  setAllShaderVars(this);
-  gl.drawArrays(gl.LINES, 0, this.shaderVars.a_Position.data.length/2);
-};
+Grid.prototype = Object.create(WObject.prototype);
+Grid.prototype.constructor = Grid;
 
 //Individual star data is stored here. It is randomly generated.
 var Stars = function(){ 
-  var obj = JSON.parse(loadExternalFile(objDir+"stars.json"));
-  this.loaded= obj.loaded;
-  this.vshader= obj.vshader;
-  this.fshader= obj.fshader;
-  this.shaderVars=new ShaderVars(obj.vars);
-  this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);  
+  WObject.call(this, "stars");
+  this.drawType=gl.POINTS;
 };
 
-/**
- * Draw object.
- */
-Stars.prototype.draw=function(){
-  setAllShaderVars(this);
-  gl.drawArrays(gl.POINTS, 0, starCount);
-};
-
+Stars.prototype = Object.create(WObject.prototype);
+Stars.prototype.constructor = Stars;
 
 //Shooting star effect data is stored here.
 var Shooter=function(){
-  var obj = JSON.parse(loadExternalFile(objDir+"shooter.json"));
-  this.loaded=obj.loaded;
-  this.vshader=obj.vshader;
-  this.fshader=obj.fshader;
-  this.shaderVars = new ShaderVars(obj.vars);
+  WObject.call(this, "shooter");
   this.speed=0;
   this.angle=0;
   this.size=0;  
-  this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
+  this.drawType=gl.LINES;
 }
-/**
- * Draw object.
- */
-Shooter.prototype.draw= function(){
-  setAllShaderVars(this);
-  gl.drawArrays(gl.LINES, 0, 2);
-};
+
+Shooter.prototype = Object.create(WObject.prototype);
+Shooter.prototype.constructor = Shooter;
 
 Shooter.prototype.animate= function(){
   var model=this.shaderVars.u_Model.data;
@@ -73,8 +46,7 @@ Shooter.prototype.animate= function(){
       this.size=0;
       this.angle=0;
       model.setIdentity();
-    } else
-      model.translate(this.speed*Math.sin(this.angle*(Math.PI/180)), 
+    } else model.translate(this.speed*Math.sin(this.angle*(Math.PI/180)), 
         -this.speed*Math.cos(this.angle*(Math.PI/180)), 0); 
   }
 };

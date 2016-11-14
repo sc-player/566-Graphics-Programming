@@ -91,6 +91,7 @@ var Generator = function(){
         -surfaceSize/2, -surfaceSize/2, surfaceSize/2, -surfaceSize/2,
         -surfaceSize/2, surfaceSize/2, surfaceSize/2, surfaceSize/2
       ]); },
+   
 
     matrix: function(){ return new Matrix4();},
   }
