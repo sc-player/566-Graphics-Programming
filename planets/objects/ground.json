@@ -1,0 +1,1 @@
+{"textured":true, "loaded": false, "vshader": "vground.glsl", "fshader": "fground.glsl", "blend": true, "vars": {"attrib": ["a_Position", "a_TexCoord", "u_Image", "u_View", "u_Proj"], "data": ["groundPoints", "groundCoords", null, "matrix", "matrix"], "sizes":[3, 2, null, null, null]}}

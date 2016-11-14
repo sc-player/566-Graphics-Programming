@@ -1,4 +1,4 @@
-var ShaderVars = function(){
+var ShaderVars = function(vars){
   var ShaderVar = function(){
     this.type=-1;
     this.buffer=-1;
@@ -30,42 +30,27 @@ var ShaderVars = function(){
         else this.type=arguments[2];
       }
       if(this.type===-1) this.type=gl.FLOAT;
-      if(this.buffer===-1) this.buffer=createBuff(gl.ARRAY_BUFFER, this.data); 
+      if(this.buffer===-1) this.buffer=createBuff(gl.ARRAY_BUFFER, this.data);  
     }
   };
-  var names=arguments[0];
-  var data=arguments[1];
-  for(i=0; i<arguments.length; ++i){
-    if(arguments[i][0] === gl.ARRAY_BUFFER || arguments[i][0]===gl.ELEMENT_ARRAY_BUFFER) 
-      var buffs=arguments[i];
-    else if(gl.hasOwnProperty(Object.prototype.toString.call(arguments[i][0])))
-      var types=arguments[i];
-    else if(typeof arguments[i][0] === 'number') var sizes=arguments[i];
-    else if(typeof arguments[i][0][0] === 'boolean') var flags=arguments[i];
-  }
-  for(i=0; i<names.length; ++i){
-    if(typeof flags!=='undefined' && flags[0][i]===true) 
-      this[names[i]] = new ShaderVar();
+  for(i=0; i<vars.attrib.length; ++i){
+    if(typeof vars.data[i] === "string") vars.data[i]=Generator[vars.data[i]]();
 
-    else if(typeof flags!=='undefined' && flags[1][i]===true) 
-      this[names[i]] = new ShaderVar(data[i]);
+    if(vars.data[i] === null) this[vars.attrib[i]] = new ShaderVar();
 
-    else if(isUniform(names[i])) 
-      this[names[i]] = new ShaderVar(data[i], (typeof types !== 'undefined') ?
-        types[i] : null);
+    else if(vars.data[i] === "matrix") 
+      this[vars.attrib[i]] = new ShaderVar(vars.data[i]);
+
+    else if(isUniform(vars.attrib[i])) 
+      this[vars.attrib[i]] = new ShaderVar(vars.data[i], 
+        (typeof vars.types !== 'undefined') ? vars.types[i] : null);
 
     else{
-      if(arguments.length===3)
-        this[names[i]] = new ShaderVar(data[i], sizes[i]);
-      else if(arguments.length===4)
-        this[names[i]] = new ShaderVar(
-          data[i], sizes[i], (typeof types !== 'undefined') ? 
-          (typeof buffs !=='undefined') ? buffs[i] : types[i] : null
-        );
-      else if(arguments.length===5)
-        this[names[i]] = new ShaderVar(
-          data[i], sizes[i], types[i], buffs[i]
-        );
+      this[vars.attrib[i]] = new ShaderVar(
+        vars.data[i], vars.sizes[i], (typeof vars.types !== 'undefined') ? 
+        vars.types[i] : gl.FLOAT, (typeof vars.buffs !== 'undefined') ? 
+        vars.buffs[i] : gl.ARRAY_BUFFER
+      );
     }
   }
 }
@@ -77,8 +62,8 @@ var ShaderVars = function(){
  * @return (ShaderProgram) Created program.
  */
 function createShaderProgram(vert, frag, shaderVars){
-  var VSHADER = loadExternalShader(vert);
-  var FSHADER = loadExternalShader(frag);
+  var VSHADER = loadExternalFile(shaderDir+vert);
+  var FSHADER = loadExternalFile(shaderDir+frag);
   if(!VSHADER || !FSHADER){
     console.log("Shader " + vert + " or " + frag + " cannot be found!");
     return;
@@ -95,9 +80,9 @@ function createShaderProgram(vert, frag, shaderVars){
  * @param (string) Filename of shader program.
  * @return (string) Shader program text.
  */
-function loadExternalShader(filepath){
+function loadExternalFile(filepath){
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', shaderDir+filepath, false);
+  xhr.open('GET', filepath, false);
   xhr.send(null);
   return xhr.responseText;
 }

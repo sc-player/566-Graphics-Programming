@@ -60,6 +60,8 @@ function handleKeyDownSpace(event, ship){
     default:
       break;
   }
+  planets.shaderVars.u_Translation.data = cameraTranslation;
+  drawArraySpace[0].shaderVars.u_Translation.data = cameraTranslation;
 }
 
 /**

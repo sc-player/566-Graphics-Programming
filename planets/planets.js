@@ -1,17 +1,17 @@
 //Planets data stored here.
 var Planets=function(){
-  this.textured=true;
-  this.loaded=false;
-  this.vshader= "vplanet.glsl";
-  this.fshader= "fplanet.glsl";
+  var obj = JSON.parse(loadExternalFile(objDir+"planets.json"));
+  this.blend    = obj.blend;
+  this.loaded   = obj.loaded;
+  this.vshader  = obj.vshader;
+  this.fshader  = obj.fshader;
+  this.textured = obj.textured;
+
   for(i=0; i<planetTypes.length; ++i){
     loadTexture(planetTypes[i] + ".gif", this);
     loadTexture(planetTypes[i] + "-ground.gif", this);
   }
 
-/**
- * Generate planet types.
- */
   this.types=function(){
     var res=[];
     for(i=0; i<planetCount; i++){
@@ -20,22 +20,13 @@ var Planets=function(){
     return res;
   }();
 
-/**
- * Generate fuel.
- */
   this.fuel=function(){
     var res=[];
     for(i=0; i<planetCount; ++i){
       res.push(Math.round(Math.random()*5+10));
     }
     return res;
-  }();
-
-/**
- * Generate points.
- */
-    
-  
+  }(); 
   this.populated=function(types){
     var res=[];
     for(var i=0; i<planetCount; ++i){
@@ -46,34 +37,7 @@ var Planets=function(){
     }
     return res;
   }(this.types);
-  this.shaderVars= new ShaderVars(
-    ["a_Position", "a_TexCoord", "u_Translation", "u_Image"],
-    function(){
-      var res=[];
-      var texRes=[];
-      for(i=0; i<planetCount; i++){
-        var roll = Math.random()*galaxySize-galaxySize/2;
-        var centerx = roll-roll%tileSize;
-        res.push(centerx);
-        roll = Math.random()*galaxySize-galaxySize/2;
-        var centery = roll-roll%tileSize;
-        res.push(centery);
-        texRes.push(.5);
-        texRes.push(.5);
-        var angle = 360/circleDegrees;
-        for(j=0; j<circleDegrees+1; ++j){
-          var cos=Math.cos(angle*j*Math.PI/180);
-          var sin=Math.sin(angle*j*Math.PI/180);
-          res.push(centerx+planetSize*cos);
-          res.push(centery+planetSize*sin);
-          texRes.push(cos/2+.5);
-          texRes.push(sin/2+.5);
-        } 
-      } 
-      return [new Float32Array(res), new Float32Array(texRes)];
-    }().concat([cameraTranslation, null]), [2, 2, false, false],
-    [[false, false, false, true], [false, false, false, false]] 
-  );
+  this.shaderVars= new ShaderVars(obj.vars);
   player.planets=this;
   for(i=0; i<this.shaderVars.a_Position.data.length; i+=(circleDegrees+2)*2){
     player.centers.push(this.shaderVars.a_Position.data[i]);

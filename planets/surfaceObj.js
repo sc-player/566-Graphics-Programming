@@ -36,23 +36,13 @@ object3d.cubeBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.cube);
 object3d.pyramidBuffer=createBuff(gl.ELEMENT_ARRAY_BUFFER, object3d.pyramid);
 
 var Ground = function(p){
-  this.loaded=true;
-  this.textured=true;
-  this.vshader="vground.glsl";
-  this.fshader="fground.glsl";
-  this.shaderVars = new ShaderVars(
-    ["a_Position", "a_TexCoord", "u_Image", "u_View", "u_Proj"],
-    [new Float32Array([
-        -surfaceSize/2, -1, -surfaceSize/2, surfaceSize/2, 
-        -1, -surfaceSize/2, -surfaceSize/2, -1, 
-        surfaceSize/2, surfaceSize/2, -1, surfaceSize/2
-      ]), new Float32Array([
-        -surfaceSize/2, -surfaceSize/2, surfaceSize/2, -surfaceSize/2, 
-        -surfaceSize/2, surfaceSize/2, surfaceSize/2, surfaceSize/2
-      ]), null, player.view, player.perspective
-    ], [3, 2, false, false, false], [[false, false, true, false, false], 
-    [false, false, false, true, true]]
-  );
+  var obj = JSON.parse(loadExternalFile(objDir+"ground.json"));
+  this.loaded= obj.loaded;
+  this.textured=obj.textured;
+  this.vshader= obj.vshader;
+  this.fshader= obj.fshader;
+  this.blend=obj.blend;
+  this.shaderVars=new ShaderVars(obj.vars);
   this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
   this.planets=p;
 };

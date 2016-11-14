@@ -1,0 +1,1 @@
+{"textured":true, "loaded": false, "vshader": "vplanet.glsl", "fshader": "fplanet.glsl", "blend": true, "vars": {"attrib": ["a_Position", "a_TexCoord", "u_Translation", "u_Image"], "data": ["planetPoints", "planetCoords", [0,0,0,0], null], "sizes":[2, 2, null, null]}}

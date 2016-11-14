@@ -37,6 +37,10 @@ Player.prototype.updateCamera = function(){
     this.worldPos.elements[2] + this.worldFacing.elements[2], 
     this.worldTop.elements[0], this.worldTop.elements[1], this.worldTop.elements[2]
   );
+  drawArraySurface.forEach(function(val){ 
+    val.shaderVars.u_View.data.set(this.view); 
+    val.shaderVars.u_Proj.data.set(this.perspective); 
+  }, this);
 };
 
 /**

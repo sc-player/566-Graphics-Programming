@@ -26,6 +26,7 @@ var drawArraySurface = [
 //  new Armory(),
 //  new TradingPost()
 ];
+
 for(i=1; i<drawArraySurface.length; ++i){
   drawArraySurface[i].program=drawArraySurface[2].program;
   if(i==1) ++i;

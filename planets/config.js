@@ -1,6 +1,7 @@
 //Environment Configuration
 var imageDir = "img/";
 var shaderDir= "shaders/";
+var objDir="objects/";
 var spaceImage='img/ship.gif';
 
 //Shape Configuration

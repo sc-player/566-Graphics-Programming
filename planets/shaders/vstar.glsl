@@ -1,4 +1,4 @@
-attribute vec4 a_Position;   
+attribute vec4 a_Position;
 attribute float a_Size;      
 attribute vec4 a_Color;      
 uniform vec4 u_Translation;  
