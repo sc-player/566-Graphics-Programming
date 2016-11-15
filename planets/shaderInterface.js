@@ -1,4 +1,4 @@
-var ShaderVars = function(vars){
+var ShaderVars = function(vars, objs){
   var ShaderVar = function(){
     this.type=-1;
     this.buffer=-1;
@@ -8,32 +8,29 @@ var ShaderVars = function(vars){
       this.data=arguments[0];
       this.matrix=true;
     } else if(gl.hasOwnProperty(Object.prototype.toString.call(arguments[1]))){
-        this.data=arguments[0];
-        this.type=arguments[1];
+      this.data=arguments[0];
+      this.type=arguments[1];
     } else {
       this.data=arguments[0];
       this.size=arguments[1];
-      if(typeof arguments[3] !== 'undefined'){
-        if(arguments[2]===gl.ARRAY_BUFFER || 
-          arguments[2]===gl.ELEMENT_ARRAY_BUFFER){
-            this.buffer=createBuff(arguments[2], this.data);
-            this.type=arguments[3];
-        } else {
-          this.buffer=createBuff(arguments[3], this.data);
-          this.type=arguments[2];
-        }
-      }
-      else if(typeof arguments[2] !== 'undefined'){
-        if(arguments[2]===gl.ARRAY_BUFFER || 
-          arguments[2]===gl.ELEMENT_ARRAY_BUFFER)
-            this.buffer=createBuff(arguments[2], this.data); 
-        else this.type=arguments[2];
-      }
-      if(this.type===-1) this.type=gl.FLOAT;
-      if(this.buffer===-1) this.buffer=createBuff(gl.ARRAY_BUFFER, this.data);  
+      this.type=arguments[3];
+      if(arguments[2]===gl.ARRAY_BUFFER){ 
+        this.buffer=createBuff(arguments[2], this.data);
+      } else if(arguments[2]===gl.ELEMENT_ARRAY_BUFFER){
+        this.buffer=arguments[0];
+      } 
     }
   };
   for(i=0; i<vars.attrib.length; ++i){
+    if(vars.data[i]==="indexed") {
+      this[vars.attrib[i]]=new ShaderVar(
+        Object3d.prototype.vertexBuffer, vars.sizes[i], 
+        gl.ELEMENT_ARRAY_BUFFER, (typeof vars.types !== 'undefined') ? 
+        vars.types[i] : gl.FLOAT
+      );
+      this.elementBuffer=Object3d.prototype[objs+"Buffer"]
+      continue;
+    }
     if(typeof vars.data[i] === "string") vars.data[i]=Generator[vars.data[i]]();
 
     if(vars.data[i] === null) this[vars.attrib[i]] = new ShaderVar();
@@ -43,34 +40,36 @@ var ShaderVars = function(vars){
 
     else if(isUniform(vars.attrib[i])) 
       this[vars.attrib[i]] = new ShaderVar(vars.data[i], 
-        (typeof vars.types !== 'undefined') ? vars.types[i] : null);
-
-    else{
-      this[vars.attrib[i]] = new ShaderVar(
-        vars.data[i], vars.sizes[i], (typeof vars.types !== 'undefined') ? 
-        vars.types[i] : gl.FLOAT, (typeof vars.buffs !== 'undefined') ? 
-        vars.buffs[i] : gl.ARRAY_BUFFER
+        (typeof vars.types !== 'undefined') ? vars.types[i] : gl.FLOAT
       );
-    }
+
+    else this[vars.attrib[i]] = new ShaderVar(
+      vars.data[i], vars.sizes[i], gl.ARRAY_BUFFER, 
+      (typeof vars.types !== 'undefined') ? vars.types[i] : gl.FLOAT 
+    ); 
   }
 }
 
-function setAllShaderVars(obj){
-  for(var v in obj.shaderVars){ 
-    if(obj.shaderVars[v].texture) setUniform(obj.program[v], 
-      textures[obj.textures[0]].unit-gl.TEXTURE0, false);
-    else if(isUniform(v)){
-      if(obj.shaderVars[v].matrix) gl.uniformMatrix4fv(
-        obj.program[v], false, obj.shaderVars[v].data.elements
-      );
-      else setUniform(obj.program[v], obj.shaderVars[v].data, 
-        obj.shaderVars[v].type===gl.FLOAT
-      );
+ShaderVars.prototype.setAllShaderVars = function(obj){
+  for(var v in this){ 
+    if(v === "setAllShaderVars") continue;
+    if(v === "elementBuffer"){ 
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementBuffer);
+      continue;
     }
+
+    if(this[v].texture) setUniform(obj.program[v], 
+      textures[obj.getCurrentTexture()].unit-gl.TEXTURE0, false);
+
+    else if(this[v].matrix) gl.uniformMatrix4fv(obj.program[v], false, 
+      this[v].data.elements);
+
+    else if(isUniform(v))
+      setUniform(obj.program[v], this[v].data, this[v].type || gl.FLOAT);
+
     else initAttribute(
-      obj.program[v], obj.shaderVars[v].buffer, 
-      obj.shaderVars[v].size, obj.shaderVars[v].type, 
-      obj.shaderVars[v].stride, obj.shaderVars[v].offset
+      obj.program[v], this[v].buffer, this[v].size, 
+      this[v].type, this[v].stride, this[v].offset
     );
   }
 }
@@ -96,6 +95,7 @@ function createShaderProgram(vert, frag, shaderVars){
   }
   return res;
 }
+
 /**
  * Submits an XML HTTP Request in order to load the shader. 
  *
@@ -117,7 +117,7 @@ function loadExternalFile(filepath){
  * @param {number} size Elements to bind to a single vertex.
  * @param {type} type GL type enum.
  */
-function initAttribute(att, buffer, size, type, start, stride){
+function initAttribute(att, buffer, size, type){
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(att, size, type || gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(att);

@@ -1,27 +1,35 @@
 var WObject = function(name){
-  var obj = JSON.parse(loadExternalFile(objDir+name+".json"));
-  this.vshader= obj.vshader;
-  this.fshader= obj.fshader;
-  this.blend=obj.blend;
-  this.drawType=obj.drawType;
-  this.shaderVars=new ShaderVars(obj.vars);
+  this.json = JSON.parse(loadExternalFile(objDir+name+".json"));
+  this.vshader= this.json.vshader;
+  this.fshader= this.json.fshader;
+  this.blend=this.json.blend;
+  this.drawType=this.json.drawType;
+  this.objs = this.json.objects;
+  this.shaderVars=new ShaderVars(this.json.vars, this.objs);
   this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
-  if(typeof obj.textures !== 'undefined'){
+  if(typeof this.json.textures !== 'undefined'){
     this.loaded=false;
     this.textured=true;
-    this.textures=obj.textures;
+    this.textures=this.json.textures;
     this.textures.forEach(function(val){
       loadTexture(val, this);
     }, this);
+  } else if(typeof this.json.cubetextures !== 'undefined'){
+    this.loaded=false;
+    this.textured=true;
+    this.textures=this.json.cubetextures;
+    this.cubeTexture=this.json.cubetexture;
+    loadCubeMap(this.cubeTexture, this.textures, this);
   } else this.textured=false;
 };
 
 WObject.prototype.draw = function(){
-  setAllShaderVars(this);
+  this.shaderVars.setAllShaderVars(this);
   if(this.textured){
     var tex=textures[this.getCurrentTexture()];
     gl.activeTexture(tex.unit);
-    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.bindTexture((typeof this.cubeTexture !== 'undefined') ? 
+      gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   }
   gl.drawArrays(this.drawType, 0, 
     this.shaderVars.a_Position.data.length/this.shaderVars.a_Position.size
@@ -29,7 +37,7 @@ WObject.prototype.draw = function(){
 };
 
 WObject.prototype.getCurrentTexture = function(){
-  return this.textures[0];
+  return this.cubeTexture || this.textures[0];
 };
 
 WObject.prototype.checkObjLoaded = function(){
@@ -44,13 +52,21 @@ WObject.prototype.checkObjLoaded = function(){
 };
 
 WObject.prototype.releaseTextureUnits = function(){
-  this.textures.forEach(function(val){
-    texUnits[textures[val].unit-gl.TEXTURE0]=false;
-  });
+  if(typeof this.cubeTexture !== 'undefined'){
+    texUnits[textures[this.cubeTexture].unit-gl.TEXTURE0]=false; 
+  } else {
+    this.textures.forEach(function(val){
+      texUnits[textures[val].unit-gl.TEXTURE0]=false;
+    });
+  }
 };
 
 WObject.prototype.gatherTextureUnits = function(){
-  this.textures.forEach(function(val){
-    activateTexUnit(this.program, val);
-  }, this);
+  if(typeof this.cubeTexture !== 'undefined'){
+    activateTexUnit(this.program, this.cubeTexture);
+  } else {
+    this.textures.forEach(function(val){
+      activateTexUnit(this.program, val);
+    }, this);
+  }
 };

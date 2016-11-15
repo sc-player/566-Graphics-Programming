@@ -1,6 +1,7 @@
 precision mediump float;
-uniform vec4 u_Color;
+varying vec3 vTexCoords;
+uniform samplerCube u_Image;
 
 void main(){
-  gl_FragColor = u_Color;
+  gl_FragColor = textureCube(u_Image, vTexCoords);
 }

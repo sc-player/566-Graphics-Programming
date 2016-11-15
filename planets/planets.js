@@ -40,7 +40,7 @@ Planets.prototype.constructor = Planets;
  * Draw object.
  */
 Planets.prototype.draw=function(){
-  setAllShaderVars(this);
+  this.shaderVars.setAllShaderVars(this);
   for(i=0; i<planetCount; ++i){
     var tex=textures[planetTypes[this.types[i]]+".gif"];
     gl.activeTexture(tex.unit);

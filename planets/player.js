@@ -124,13 +124,19 @@ Player.prototype.rotate=function(pos){
 Player.prototype.move=function(pos){
   if(pos){
     this.worldPos.elements[0]+=moveSpeed*this.worldFacing.elements[0]*deltaTime;
-    this.worldPos.elements[1]+=moveSpeed*this.worldFacing.elements[1]*deltaTime;
     this.worldPos.elements[2]+=moveSpeed*this.worldFacing.elements[2]*deltaTime;
   } else {
     this.worldPos.elements[0]-=moveSpeed*this.worldFacing.elements[0]*deltaTime;
-    this.worldPos.elements[1]-=moveSpeed*this.worldFacing.elements[1]*deltaTime;
     this.worldPos.elements[2]-=moveSpeed*this.worldFacing.elements[2]*deltaTime;
   }
+  if(this.worldPos.elements[0]>surfaceSize/2) 
+    this.worldPos.elements[0]=surfaceSize/2;
+  else if(this.worldPos.elements[0]<-surfaceSize/2)
+    this.worldPos.elements[0]=-surfaceSize/2;
+  if(this.worldPos.elements[2]>surfaceSize/2) 
+    this.worldPos.elements[2]=surfaceSize/2;
+  else if(this.worldPos.elements[2]<-surfaceSize/2) 
+    this.worldPos.elements[2]=-surfaceSize/2;
 };
 
 Player.prototype.getPTypeIndex = function(){

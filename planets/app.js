@@ -21,16 +21,12 @@ var ship=drawArraySpace[3];
 
 var drawArraySurface = [
   new Ground(planets),
-//  new SurfaceShip(),
-//  new FuelDepot(),
-//  new Armory(),
-//  new TradingPost()
+  new SurfaceShip(),
+  new FuelDepot(),
+  new Armory(),
+  new TradingPost(),
+  new QuestHut()
 ];
-
-for(i=1; i<drawArraySurface.length; ++i){
-  drawArraySurface[i].program=drawArraySurface[2].program;
-  if(i==1) ++i;
-}
 
 var drawSpaceLen = drawArraySpace.length;
 var drawSurfLen = drawArraySurface.length;

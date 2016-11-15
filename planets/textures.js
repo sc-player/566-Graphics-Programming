@@ -19,7 +19,6 @@ function activateTexUnit(uni, text){
   var tex=textures[text];
   tex.unit=gl["TEXTURE"+getNewTexUnit()]; 
   uni.data=tex.unit-gl.TEXTURE0;
-  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
   gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   if(tex.cube){
     for(i=0; i<tex.images.length; ++i){
@@ -47,6 +46,7 @@ function loadTexture(texName, object){
   */
   function newTexture(name, img, obj){
     tex = gl.createTexture();
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
@@ -74,6 +74,7 @@ function loadCubeMap(texName, texNames, object){
   function newCubeMap(obj, name, names, img, i){
     if(!textures[name]){
       tex = gl.createTexture();
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
       gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);

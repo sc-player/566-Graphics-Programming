@@ -2,7 +2,6 @@
 var Ship = function(){
   WObject.call(this, "ship");
   this.drawType=gl.TRIANGLE_STRIP;
-//  loadCubeMap(this.surfaceTexture, this.surfaceTextures, this);
 };
 
 Ship.prototype = Object.create(WObject.prototype);
