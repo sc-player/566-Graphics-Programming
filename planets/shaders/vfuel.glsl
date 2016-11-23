@@ -6,5 +6,5 @@ varying vec3 vTexCoords;
 
 void main(){
   gl_Position = u_Proj*u_View*u_Model*a_Position;
-  vTexCoords = vec3(a_Position);
+  vTexCoords = vec3(-a_Position.x, -a_Position.y, -a_Position.z);
 }
