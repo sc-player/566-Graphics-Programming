@@ -38,6 +38,9 @@ var onPlanet=false;
  * Creates shaders, sets event handlers, and initializes objects.
  */
 function initGL(){
+  drawArraySpace.concat(drawArraySurface).forEach(function(val){
+    
+  });
   document.onkeydown = function(event){handleKeyDown(event, ship);};
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){

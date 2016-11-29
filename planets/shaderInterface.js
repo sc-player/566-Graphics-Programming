@@ -1,3 +1,6 @@
+var SSources = {};
+var ShaderPrograms = {};
+
 var ShaderVars = function(vars, objs){
   var ShaderVar = function(){
     this.type=-1;
@@ -83,17 +86,18 @@ ShaderVars.prototype.setAllShaderVars = function(obj){
  * @return (ShaderProgram) Created program.
  */
 function createShaderProgram(vert, frag, shaderVars){
-  var VSHADER = loadExternalFile(shaderDir+vert);
-  var FSHADER = loadExternalFile(shaderDir+frag);
-  if(!VSHADER || !FSHADER){
+  if(ShaderPrograms[vert+frag]) return ShaderPrograms[vert+frag];
+  if(!SSources[vert]) SSources[vert] = loadExternalFile(shaderDir+vert);
+  if(!SSources[frag]) SSources[frag] = loadExternalFile(shaderDir+frag);
+  if(!SSources[frag] || !SSources[vert]){
     console.log("Shader " + vert + " or " + frag + " cannot be found!");
     return;
   }
-  var res=createProgram(gl, VSHADER, FSHADER);
+  var res=createProgram(gl, SSources[vert], SSources[frag]);
   for(var v in shaderVars){
     res[v]=getShaderVar(res, v);
   }
-  return res;
+  return ShaderPrograms[vert+frag]=res;
 }
 
 /**
