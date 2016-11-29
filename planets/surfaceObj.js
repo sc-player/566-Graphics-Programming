@@ -1,15 +1,9 @@
 var Object3d = function(name){
   WObject.call(this, name);
   this.drawType=gl.TRIANGLES;
-  if(typeof this.json.coords !== 'undefined') 
-    this.shaderVars.u_Model.data.translate(this.json.coords[0], 
-      this.json.coords[1], this.json.coords[2]);
-  if(typeof this.json.rot !== 'undefined') 
-    this.shaderVars.u_Model.data.rotate(this.json.rot[0], 
-      this.json.rot[1], this.json.rot[2], this.json.rot[3]);
-  if(typeof this.json.scale !== 'undefined') 
-    this.shaderVars.u_Model.data.scale(this.json.scale[0], this.json.scale[1],
-      this.json.scale[2]);
+  if(typeof this.json.coords !== 'undefined') this.pos=this.json.coords;
+  if(typeof this.json.rot !== 'undefined') this.rot=this.json.rot;
+  if(typeof this.json.scale !== 'undefined') this.scale=this.json.scale;
 };
 
 Object3d.prototype = Object.create(WObject.prototype);
@@ -51,7 +45,20 @@ Object3d.prototype.cubeBuffer=
 Object3d.prototype.pyramidBuffer=
   createBuff(gl.ELEMENT_ARRAY_BUFFER, Object3d.prototype.pyramid);
 
+Object3d.prototype.createModelMatrix = function(){
+  if(typeof this.pos !== 'undefined') 
+    this.shaderVars.u_Model.data.setTranslate(this.pos[0], 
+      this.pos[1], this.pos[2]);
+  if(typeof this.rot !== 'undefined') 
+    this.shaderVars.u_Model.data.rotate(this.json.rot[0], 
+      this.rot[1], this.rot[2], this.rot[3]);
+  if(typeof this.scale !== 'undefined') 
+    this.shaderVars.u_Model.data.scale(this.scale[0], 
+      this.scale[1], this.scale[2]);
+}
+
 Object3d.prototype.draw = function(){
+  this.createModelMatrix();
   this.shaderVars.setAllShaderVars(this);
   if(this.textured){
     var tex = textures[this.getCurrentTexture()];
