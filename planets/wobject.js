@@ -3,7 +3,7 @@ var WObject = function(name){
   this.vshader= this.json.vshader;
   this.fshader= this.json.fshader;
   this.blend=this.json.blend;
-  this.drawType=this.json.drawType;
+  this.drawType=gl[this.json.drawType];
   this.objs = this.json.objects;
   this.shaderVars=new ShaderVars(this.json.vars, this.objs);
   this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
@@ -24,7 +24,7 @@ var WObject = function(name){
 };
 
 WObject.prototype.draw = function(){
-  this.shaderVars.setAllShaderVars(this);
+  var pointLength = this.shaderVars.setAllShaderVars(this);
   if(this.textured){
     var tex=textures[this.getCurrentTexture()];
     gl.activeTexture(tex.unit);
@@ -32,7 +32,7 @@ WObject.prototype.draw = function(){
       gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   }
   gl.drawArrays(this.drawType, 0, 
-    this.shaderVars.a_Position.data.length/this.shaderVars.a_Position.size
+    pointLength/this.shaderVars.a_Position.size
   );
 };
 

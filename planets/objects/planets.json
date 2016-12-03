@@ -5,7 +5,7 @@
     "water.gif", "icy.gif", "fiery.gif"
   ], "vars": {
     "attrib": ["a_Position", "a_TexCoords", "u_Model", "u_Image"], 
-    "data": ["planetPoints", "planetCoords", "matrix", null], 
+    "data": ["planetPoints", "planetCoords", "matid", null], 
     "sizes":[2, 2, null, null]
   }
 }

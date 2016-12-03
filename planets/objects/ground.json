@@ -1,1 +1,19 @@
-{"vshader": "vground.glsl", "fshader": "fground.glsl", "blend": true, "textures": ["barren-ground.gif", "metropolis-ground.gif", "rocky-ground.gif", "jungle-ground.gif", "plains-ground.gif", "water-ground.gif", "icy-ground.gif", "fiery-ground.gif"], "vars": {"attrib": ["a_Position", "a_TexCoord", "u_Image", "u_View", "u_Proj"], "data": ["groundPoints", "groundCoords", null, "matrix", "matrix"], "sizes":[3, 2, null, null, null]}}
+{
+  "vshader": "vground.glsl", 
+  "fshader": "fground.glsl", 
+  "blend": true, 
+  "textures": [
+    "barren-ground.gif", "metropolis-ground.gif", 
+    "rocky-ground.gif", "jungle-ground.gif", 
+    "plains-ground.gif", "water-ground.gif", 
+    "icy-ground.gif", "fiery-ground.gif"
+  ], "vars": {
+    "attrib": [
+      "a_Position", "a_TexCoord", "u_Image", "u_View", 
+      "u_Proj", "u_NormalMatrix", "u_LightDir"
+    ], "data": [
+      "groundPoints", "groundCoords", null, "view", 
+      "proj", "matid", "lightDir"
+    ], "sizes":[3, 2, null, null, null, null, null]
+  }
+}

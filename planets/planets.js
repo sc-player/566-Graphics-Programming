@@ -27,9 +27,12 @@ var Planets=function(){
     return res;
   }(this.types);
   player.planets=this;
-  for(i=0; i<this.shaderVars.a_Position.data.length; i+=(circleDegrees+2)*2){
-    player.centers.push(this.shaderVars.a_Position.data[i]);
-    player.centers.push(this.shaderVars.a_Position.data[i+1]); 
+  var dat = typeof(this.shaderVars.a_Position.data) === "string" ? 
+    Generator[this.shaderVars.a_Position.data] : 
+      this.shaderVars.a_Position.data;
+  for(i=0; i<dat.length; i+=(circleDegrees+2)*2){
+    player.centers.push(dat[i]);
+    player.centers.push(dat[i+1]); 
   }
 };
 

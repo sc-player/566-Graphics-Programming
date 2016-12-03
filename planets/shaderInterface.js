@@ -7,9 +7,6 @@ var ShaderVars = function(vars, objs){
     this.buffer=-1;
     if(arguments.length===0){
       this.texture=true;
-    } else if(arguments.length===1){
-      this.data=arguments[0];
-      this.matrix=true;
     } else if(gl.hasOwnProperty(Object.prototype.toString.call(arguments[1]))){
       this.data=arguments[0];
       this.type=arguments[1];
@@ -18,7 +15,8 @@ var ShaderVars = function(vars, objs){
       this.size=arguments[1];
       this.type=arguments[3];
       if(arguments[2]===gl.ARRAY_BUFFER){ 
-        this.buffer=createBuff(arguments[2], this.data);
+        this.buffer=createBuff(arguments[2], (typeof(arguments[0])==="string" ?
+          Generator[arguments[0]] : arguments[0]));
       } else if(arguments[2]===gl.ELEMENT_ARRAY_BUFFER){
         this.buffer=arguments[0];
       } 
@@ -27,23 +25,25 @@ var ShaderVars = function(vars, objs){
   for(i=0; i<vars.attrib.length; ++i){
     if(vars.data[i]==="indexed") {
       this[vars.attrib[i]]=new ShaderVar(
-        Object3d.prototype.vertexBuffer, vars.sizes[i], 
-        gl.ELEMENT_ARRAY_BUFFER, (typeof vars.types !== 'undefined') ? 
+        Object3d.prototype[objs+"Buffer"].vertices, vars.sizes[i], 
+        gl.ELEMENT_ARRAY_BUFFER, (typeof vars.types !== 'undefined') ?
         vars.types[i] : gl.FLOAT
       );
-      this.elementBuffer=Object3d.prototype[objs+"Buffer"]
-      continue;
+      this.elementBuffer=Object3d.prototype[objs+"Buffer"].indices;
     }
-    if(typeof vars.data[i] === "string") vars.data[i]=Generator[vars.data[i]]();
+    
+    else if (vars.data[i] === "matid")
+      this[vars.attrib[i]] = new ShaderVar(new Matrix4());
 
-    if(vars.data[i] === null) this[vars.attrib[i]] = new ShaderVar();
-
-    else if(vars.data[i] === "matrix") 
-      this[vars.attrib[i]] = new ShaderVar(vars.data[i]);
+    else if(vars.data[i] === null) this[vars.attrib[i]] = new ShaderVar();
 
     else if(isUniform(vars.attrib[i])) 
-      this[vars.attrib[i]] = new ShaderVar(vars.data[i], 
-        (typeof vars.types !== 'undefined') ? vars.types[i] : gl.FLOAT
+      this[vars.attrib[i]] = new ShaderVar(
+        typeof vars.data[i] === "string" ? 
+          typeof Generator[vars.data[i]] ==="function" ? 
+            Generator[vars.data[i]]() : Generator[vars.data[i]] : 
+          vars.data[i], 
+        typeof vars.types !=='undefined' ? vars.types[i] : gl.FLOAT
       );
 
     else this[vars.attrib[i]] = new ShaderVar(
@@ -54,27 +54,34 @@ var ShaderVars = function(vars, objs){
 }
 
 ShaderVars.prototype.setAllShaderVars = function(obj){
+  var length=0;
   for(var v in this){ 
     if(v === "setAllShaderVars") continue;
     if(v === "elementBuffer"){ 
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementBuffer);
       continue;
     }
-
-    if(this[v].texture) setUniform(obj.program[v], 
+    if(this[v].texture){ setUniform(obj.program[v], 
       textures[obj.getCurrentTexture()].unit-gl.TEXTURE0, false);
+      continue;
+    }
 
-    else if(this[v].matrix) gl.uniformMatrix4fv(obj.program[v], false, 
-      this[v].data.elements);
-
-    else if(isUniform(v))
-      setUniform(obj.program[v], this[v].data, this[v].type || gl.FLOAT);
-
+    var dat = (typeof this[v].data === "string") ? 
+      (typeof Generator[this[v].data] === "function" ? 
+        Generator[this[v].data]():  Generator[this[v].data] ): this[v].data;
+    if(v==="a_Position") length=dat.length;
+    if(isUniform(v)){
+      if(dat.hasOwnProperty("elements"))
+        gl.uniformMatrix4fv(obj.program[v], false, dat.elements);
+      else 
+        setUniform(obj.program[v], dat, this[v].type || gl.FLOAT);
+    }
     else initAttribute(
       obj.program[v], this[v].buffer, this[v].size, 
       this[v].type, this[v].stride, this[v].offset
     );
   }
+  return length;
 }
 
 

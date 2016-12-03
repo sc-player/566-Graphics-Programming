@@ -1,1 +1,1 @@
-{"vshader": "vstar.glsl", "fshader": "fstar.glsl", "vars": {"attrib": ["a_Position", "a_Color", "a_Size", "u_Model"], "data": ["starPoints", "starColors", "starSizes", "matrix"], "sizes":[2, 3, 1, null]}}
+{"vshader": "vstar.glsl", "fshader": "fstar.glsl", "drawType": "POINTS", "vars": {"attrib": ["a_Position", "a_Color", "a_Size", "u_Model"], "data": ["starPoints", "starColors", "starSizes", "matid"], "sizes":[2, 3, 1, null]}}

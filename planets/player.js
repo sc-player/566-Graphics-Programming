@@ -38,8 +38,8 @@ Player.prototype.updateCamera = function(){
     this.worldTop.elements[0], this.worldTop.elements[1], this.worldTop.elements[2]
   );
   drawArraySurface.forEach(function(val){ 
-    val.shaderVars.u_View.data.set(this.view); 
-    val.shaderVars.u_Proj.data.set(this.perspective); 
+    Generator.view().set(this.view); 
+    Generator.proj().set(this.perspective); 
   }, this);
 };
 

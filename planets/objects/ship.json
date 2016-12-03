@@ -1,1 +1,11 @@
-{"vshader": "vspacetextured.glsl", "fshader": "fspacetextured.glsl", "blend": true, "textures": ["ship.gif"], "vars": {"attrib": ["a_Position", "a_TexCoords", "u_Model", "u_Image"], "data": ["shipPoints", "shipCoords", "matrix", null], "sizes":[2, 2, null, null]}}
+{
+  "vshader": "vspacetextured.glsl", 
+  "fshader": "fspacetextured.glsl", 
+  "blend": true, 
+  "textures": ["ship.gif"], 
+  "vars": {
+    "attrib": ["a_Position", "a_TexCoords", "u_Model", "u_Image"], 
+    "data": ["shipPoints", "shipCoords", "matid", null], 
+    "sizes":[2, 2, null, null]
+  }
+}

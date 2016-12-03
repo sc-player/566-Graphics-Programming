@@ -1,1 +1,25 @@
-{"vshader": "vbuilding.glsl", "fshader": "fbuilding.glsl", "blend": true, "coords": [-35, -0.25, 20], "rot": [60, 0, 1, 0], "scale": [2, 0.75, 1], "objects": ["cube"], "cubetexture": "questhut", "cubetextures": ["qh-left.gif", "qh-right.gif", "qh-top.gif", "qh-bottom.gif", "qh-back.gif", "qh-front.gif"], "vars": {"attrib": ["a_Position", "u_Image", "u_Model", "u_View", "u_Proj"], "data": ["indexed", null, "matrix", "matrix", "matrix"], "sizes":[3, null, null, null, null]}}
+{
+  "vshader": "vbuilding.glsl", 
+  "fshader": "fbuilding.glsl", 
+  "blend": true, 
+  "coords": [-35, -0.25, 20], 
+  "rot": [60, 0, 1, 0], 
+  "scale": [2, 0.75, 1], 
+  "objects": ["cube"], 
+  "cubetexture": "questhut", 
+  "cubetextures": [
+    "qh-left.gif", "qh-right.gif", "qh-top.gif", 
+    "qh-bottom.gif", "qh-back.gif", "qh-front.gif"
+  ], 
+  "vars": {
+    "attrib": [
+      "a_Position", "a_Normal", "u_Image", "u_Model", 
+      "u_View", "u_Proj", "u_NormalMatrix", "u_LightDir"
+    ], 
+    "data": [
+      "indexed", "cubeNormals", null, "matid", 
+      "view", "proj", "matid", "lightDir"
+    ], 
+    "sizes": [3, 3, null, null, null, null, null, null]
+  }
+}

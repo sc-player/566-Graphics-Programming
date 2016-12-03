@@ -9,7 +9,7 @@ var circleDegrees = 36;
 
 //Get webgl canvas and context
 var canvas=document.getElementById('webgl'); 
-var gl = getWebGLContext(canvas);
+var gl = WebGLUtils.setupWebGL(canvas);
 
 //Galaxy Configuration
 var galaxySize = 10;

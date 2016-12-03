@@ -6,7 +6,7 @@ var Generator = function(){
         res.push([this.i, -galaxySize/2-tileSize/2, this.i, galaxySize/2+tileSize/2, galaxySize/2+tileSize/2, this.i, -galaxySize/2-tileSize/2, this.i])
       }
       return new Float32Array([].concat.apply([], res));
-    },
+    }(),
     
     starPoints: function(){
       var res=[];
@@ -14,7 +14,7 @@ var Generator = function(){
         res.push(Math.random()*galaxySize-galaxySize/2);
       }
       return new Float32Array(res);
-    }, 
+    }(), 
 
     starColors: function(){
       var res = [];
@@ -24,7 +24,7 @@ var Generator = function(){
         res.push(Math.random()/starBlueDivisor+starBlueOffset);
       }
       return new Float32Array(res);
-    }, 
+    }(), 
     
     starSizes: function(){
       var res = [];
@@ -32,18 +32,16 @@ var Generator = function(){
         res.push(Math.random()*starSize+starSizeOffset);
       }
       return new Float32Array(res);
-    },
+    }(),
   
-    shootPoints: function() { return new Float32Array([0,1,0,1.2]); },
+    shootPoints: new Float32Array([0,1,0,1.2]),
     
-    shipPoints: function() { return new Float32Array([
+    shipPoints: new Float32Array([
       -shipWidth, -shipHeight, shipWidth, -shipHeight,
       -shipWidth, shipHeight, shipWidth, shipWidth
-    ]); },
+    ]),
 
-    shipCoords: function() { 
-      return new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
-    },
+    shipCoords: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
 
     planetPoints: function(){
       var res=[];
@@ -63,7 +61,7 @@ var Generator = function(){
         }
       }
       return new Float32Array(res);
-    },
+    }(),
 
     planetCoords: function(){
       var res=[];
@@ -79,20 +77,36 @@ var Generator = function(){
         }
       }
       return new Float32Array(res);
-    },
+    }(),
     
-    groundPoints: function() { return new Float32Array([
-        -surfaceSize/2, -1, -surfaceSize/2, surfaceSize/2,
-        -1, -surfaceSize/2, -surfaceSize/2, -1,
-        surfaceSize/2, surfaceSize/2, -1, surfaceSize/2
-      ]); },
+    groundPoints: new Float32Array([
+      -surfaceSize/2, -1, -surfaceSize/2, surfaceSize/2,
+      -1, -surfaceSize/2, -surfaceSize/2, -1,
+      surfaceSize/2, surfaceSize/2, -1, surfaceSize/2
+    ]),
   
-    groundCoords: function() { return new Float32Array([
-        -surfaceSize/2, -surfaceSize/2, surfaceSize/2, -surfaceSize/2,
-        -surfaceSize/2, surfaceSize/2, surfaceSize/2, surfaceSize/2
-      ]); },
-   
+    groundCoords: new Float32Array([
+      -surfaceSize/20, -surfaceSize/20, surfaceSize/20, -surfaceSize/20,
+      -surfaceSize/20, surfaceSize/20, surfaceSize/20, surfaceSize/20
+    ]),
 
-    matrix: function(){ return new Matrix4();},
+    cubeNormals: function(cp){
+      var check=[];
+      for(var i=0; i<cp.length; i++){
+        for(var j=0; j<4; ++j){
+          if(j==0) check.push([]);
+          for(var k=0; k<3; ++k){
+            if(j==0) check[i].push(cp[i+j*3+k]);
+            else if(check[i][k]!==cp[i+j*3+k]) check[i][k]=0;
+          }
+        }
+      }
+      return new Float32Array(flatten(check));
+    }(Object3d.prototype.cubePoints),
+   
+    lightDir: [-0.3, -1, -0.5],
+
+    view: function(){ return player.view; },
+    proj: function(){ return player.perspective; }
   }
 }();
