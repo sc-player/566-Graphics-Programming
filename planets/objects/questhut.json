@@ -6,11 +6,7 @@
   "rot": [60, 0, 1, 0], 
   "scale": [2, 0.75, 1], 
   "objects": ["cube"], 
-  "cubetexture": "questhut", 
-  "cubetextures": [
-    "qh-left.gif", "qh-right.gif", "qh-top.gif", 
-    "qh-bottom.gif", "qh-back.gif", "qh-front.gif"
-  ], 
+  "textures": ["qh"], 
   "vars": {
     "attrib": [
       "a_Position", "a_Normal", "u_Image", "u_Model", 

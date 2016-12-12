@@ -5,10 +5,6 @@
   "coords": [0, 0, 15], 
   "objects": ["cube"], 
   "cubetexture": "ship-surface", 
-  "cubetextures": [
-    "ship-left.gif", "ship-right.gif", "ship-top.gif", 
-    "ship-bottom.gif", "ship-back.gif", "ship-front.gif"
-  ], 
   "vars": {
     "attrib": [
       "a_Position", "a_Normal", "u_Image", "u_Model", "u_View", "u_Proj",

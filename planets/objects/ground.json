@@ -9,11 +9,11 @@
     "icy-ground.gif", "fiery-ground.gif"
   ], "vars": {
     "attrib": [
-      "a_Position", "a_TexCoord", "u_Image", "u_View", 
-      "u_Proj", "u_NormalMatrix", "u_LightDir"
+      "a_Position", "a_TexCoord", "u_Image", "u_View", "u_Proj", 
+      "u_NormalMatrix", "u_LightDir", "u_ALightColor", "u_DLightColor"
     ], "data": [
-      "groundPoints", "groundCoords", null, "view", 
-      "proj", "matid", "lightDir"
-    ], "sizes":[3, 2, null, null, null, null, null]
+      "groundPoints", "groundCoords", null, "view", "proj", 
+      "matid", "lightDir", "ambientColor", "directionColor"
+    ], "sizes": [3, 2, null, null, null, null, null, null]
   }
 }

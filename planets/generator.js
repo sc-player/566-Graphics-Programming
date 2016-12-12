@@ -90,21 +90,18 @@ var Generator = function(){
       -surfaceSize/20, surfaceSize/20, surfaceSize/20, surfaceSize/20
     ]),
 
-    cubeNormals: function(cp){
-      var check=[];
-      for(var i=0; i<cp.length; i++){
-        for(var j=0; j<4; ++j){
-          if(j==0) check.push([]);
-          for(var k=0; k<3; ++k){
-            if(j==0) check[i].push(cp[i+j*3+k]);
-            else if(check[i][k]!==cp[i+j*3+k]) check[i][k]=0;
-          }
-        }
-      }
-      return new Float32Array(flatten(check));
-    }(Object3d.prototype.cubePoints),
+    cubeNormals: new Float32Array([
+      0, 0, 1,   0, 0, 1,    0, 0, 1,    0, 0, 1,
+      1, 0, 0,   1, 0, 0,    1, 0, 0,    1, 0, 0,
+      0, 1, 0,   0, 1, 0,    0, 1, 0,    0, 1, 0,
+     -1, 0, 0,  -1, 0, 0,   -1, 0, 0,   -1, 0, 0,
+      0,-1, 0,   0,-1, 0,    0,-1, 0,    0,-1, 0,
+      0, 0,-1,   0, 0,-1,    0, 0,-1,    0, 0,-1
+    ]),
    
-    lightDir: [-0.3, -1, -0.5],
+    ambientColor: [.2, .2, .2],
+    lightDir: [-1, 1, -1],
+    directionColor: [0.8, 0.8, 0.8],
 
     view: function(){ return player.view; },
     proj: function(){ return player.perspective; }

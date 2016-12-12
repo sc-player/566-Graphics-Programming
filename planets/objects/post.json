@@ -4,22 +4,18 @@
   "blend": true, 
   "coords": [-15, 0, 0], 
   "rot": [45, 0, 1, 0], 
-  "scale": [0.75, 1, 2], 
+  "scale": [1, 1, 2], 
   "objects": ["cube"], 
-  "cubetexture": "post", 
-  "cubetextures": [
-    "post-left.gif", "post-right.gif", "post-top.gif", 
-    "post-bottom.gif", "post-back.gif", "post-front.gif"
-  ], 
+  "textures": ["post"], 
   "vars": {
     "attrib": [
       "a_Position", "a_Normal", "u_Image", "u_Model", "u_View", "u_Proj",
-      "u_NormalMatrix", "u_LightDir"
+      "u_NormalMatrix", "u_LightDir", "u_ALightColor", "u_DLightColor"
     ], 
     "data": [
-      "indexed", "cubeNormals", null, "matid", "view", 
-      "proj", "matid", "lightDir"
+      "indexed", "cubeNormals", null, "matid", "view", "proj", "matid", 
+      "lightDir", "ambientColor", "directionColor"
     ], 
-    "sizes":[3, null, null, null, null]
+    "sizes":[3, 3, null, null, null, null, null, null]
   }
 }

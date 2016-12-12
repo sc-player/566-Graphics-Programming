@@ -1,6 +1,7 @@
 //Keep track of texture units.
 var texUnits=[];
 var textures={};
+var sides=["-right", "-left", "-up", "-down", "-front", "-back"];
 /**
  * Returns the first unused texture unit.
  *
@@ -17,14 +18,19 @@ function getNewTexUnit(){
 
 function activateTexUnit(uni, text){
   var tex=textures[text];
+  var type = (tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D;
+  var edge = (tex.cube) ? gl.CLAMP_TO_EDGE : gl.REPEAT;
+  gl.bindTexture(type, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+  gl.texParameteri(type, gl.TEXTURE_WRAP_S, edge);
+  gl.texParameteri(type, gl.TEXTURE_WRAP_T, edge);
+  gl.texParameteri(type, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(type, gl.TEXTURE_MAG_FILTER, gl.NEAREST); 
   tex.unit=gl["TEXTURE"+getNewTexUnit()]; 
   uni.data=tex.unit-gl.TEXTURE0;
-  gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
-  if(tex.cube){
-    for(i=0; i<tex.images.length; ++i){
-      gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.images[i]); 
-    }
-  }
+  if(tex.cube)
+    for(i=0; i<sides.length; ++i)
+      gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.images[sides[i]]);  
   else gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex.image);
 }
 
@@ -46,23 +52,17 @@ function loadTexture(texName, object){
   */
   function newTexture(name, img, obj){
     tex = gl.createTexture();
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); 
     tex.image=img;
-    tex.loaded=true;
     textures[name]=tex;
+    tex.loaded=true;
     obj["checkObjLoaded"]();
   }
   var image = new Image();
   image.src=imageDir+texName;
-  image.onload = function(){newTexture(texName, image, object);};
+  image.onload = function(){ newTexture(texName, image, object); };
 }
  
-function loadCubeMap(texName, texNames, object){ 
+function loadCubeMap(texName, object){ 
  /**
   * Creates texture when image is loaded, initializes the texture, and adds it 
   * to the object.
@@ -71,34 +71,29 @@ function loadCubeMap(texName, texNames, object){
   * @param (int) uni Texture unit index.
   * @param (Image) img Image object that was loaded.
   */
-  function newCubeMap(obj, name, names, img, i){
+  function newCubeMap(obj, name, side, img, i){
     if(!textures[name]){
       tex = gl.createTexture();
-      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-      gl.bindTexture(gl.TEXTURE_CUBE_MAP, tex);
-      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST); 
-      tex.images=[];
+      tex.images={};
       tex.cube=true;
+      tex.loaded=false;
       textures[name]=tex;
     } else{
       tex=textures[name];
     }
-    tex.images[i]=img;
-    if(tex.images.length>5){
+    tex.images[side]=img;
+    if(i>5){
       tex.loaded=true;
       obj["checkObjLoaded"]();
     }
   }
   var i=0;
-  texNames.forEach(function(val){
+  sides.forEach(function(val) {
     var image = new Image();
-    image.src=imageDir+val;
+    image.src=imageDir+texName+val+".gif";
     image.onload = function(){
-      newCubeMap(object, texName, texNames, image, i); 
-      ++i;
+      newCubeMap(object, texName, val, image, i); 
+      i++;
     };
   });
 }

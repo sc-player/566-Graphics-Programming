@@ -21,11 +21,11 @@ var ship=drawArraySpace[3];
 
 var drawArraySurface = [
   new Ground(planets),
-  new SurfaceShip(),
-  new FuelDepot(),
-  new Armory(),
+//  new SurfaceShip(),
+//  new FuelDepot(),
+//  new Armory(),
   new TradingPost(),
-  new QuestHut()
+//  new QuestHut()
 ];
 
 var drawSpaceLen = drawArraySpace.length;
@@ -38,9 +38,6 @@ var onPlanet=false;
  * Creates shaders, sets event handlers, and initializes objects.
  */
 function initGL(){
-  drawArraySpace.concat(drawArraySurface).forEach(function(val){
-    
-  });
   document.onkeydown = function(event){handleKeyDown(event, ship);};
   document.onkeyup = handleKeyUp;
   function ResizeWindow(){
@@ -53,9 +50,6 @@ function initGL(){
   gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
   gl.enable(gl.BLEND);
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  drawArraySpace.forEach(function(val){
-    if(val["textured"]) val["gatherTextureUnits"]();
-  });
 }
 
 /**
@@ -63,6 +57,9 @@ function initGL(){
  */
 function checkForLoaded(){
   drawArraySpace.forEach(function(val){
+    if(!val["loaded"]) return true;
+  });
+  drawArraySurface.forEach(function(val){
     if(!val["loaded"]) return true;
   });
   return false;
@@ -119,5 +116,9 @@ function tick(){
 function main(){
   initGL(); 
   while(checkForLoaded()){}
+  drawArraySpace.forEach(function(val){
+    if(val["textured"]) 
+      val["gatherTextureUnits"](); 
+  });
   tick();
 }

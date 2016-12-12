@@ -6,10 +6,6 @@
   "scale": [2, 1.5, 2], 
   "objects": ["cube"], 
   "cubetexture": "armory", 
-  "cubetextures": [
-    "armory-left.gif", "armory-right.gif", "armory-top.gif", 
-    "armory-bottom.gif", "armory-back.gif", "armory-front.gif"
-  ], 
   "vars": {
     "attrib": [
       "a_Position", "a_Normal", "u_Image", "u_Model", 

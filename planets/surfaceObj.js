@@ -1,3 +1,12 @@
+var mStack = [];
+function pushMat4(m){
+  var m2 = new Matrix4(m);
+  mStack.push(m2); 
+}
+function popMat4(){
+  return mStack.pop();
+}
+
 var Object3d = function(name){
   WObject.call(this, name);
   this.drawType=gl.TRIANGLES;
@@ -64,8 +73,9 @@ Object3d.prototype.pyramidBuffer={
 };
 
 Object3d.prototype.createModelMatrix = function(){
+  this.shaderVars.u_Model.data = new Matrix4();
   if(typeof this.pos !== 'undefined') 
-    this.shaderVars.u_Model.data.setTranslate(
+    this.shaderVars.u_Model.data.translate(
       this.pos[0], this.pos[1], this.pos[2]
     );
   if(typeof this.rot !== 'undefined') 
@@ -76,25 +86,15 @@ Object3d.prototype.createModelMatrix = function(){
     this.shaderVars.u_Model.data.scale(
       this.scale[0], this.scale[1], this.scale[2]
     );
-  this.shaderVars.u_NormalMatrix.data.setInverseOf(
-    player.view.concat(this.shaderVars.u_Model.data)
-  );
-  this.shaderVars.u_NormalMatrix.data.transpose();
+  ;
+  this.shaderVars.u_NormalMatrix.data = new Matrix4(this.shaderVars.u_Model.data).setInverseOf(
+    new Matrix4(player.view).concat(this.shaderVars.u_Model.data)
+  ).transpose();
 };
 
 Object3d.prototype.draw = function(){
   this.createModelMatrix();
-  this.shaderVars.setAllShaderVars(this);
-  if(this.textured){
-    var tex = textures[this.getCurrentTexture()];
-    gl.activeTexture(tex.unit);
-    gl.bindTexture((typeof this.cubeTexture !== 'undefined') ? 
-      gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex
-    );
-  }
-  gl.drawElements(
-    this.drawType, Object3d.prototype[this.objs[0]].length, gl.UNSIGNED_BYTE, 0
-  );
+  WObject.prototype.draw.call(this);
 };
 
 var Ground = function(p){
@@ -111,7 +111,7 @@ Ground.prototype.getCurrentTexture = function(){
 };
 
 Ground.prototype.gatherTextureUnits = function(){
-  activateTexUnit(this.program, this.textures[player.getPTypeIndex()]);
+  activateTexUnit(this.program, this.getCurrentTexture());
 };
 
 var SurfaceShip = function(){

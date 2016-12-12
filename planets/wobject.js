@@ -12,14 +12,9 @@ var WObject = function(name){
     this.textured=true;
     this.textures=this.json.textures;
     this.textures.forEach(function(val){
-      loadTexture(val, this);
+      if(val.indexOf(".gif")===-1) loadCubeMap(val, this);
+      else loadTexture(val, this);
     }, this);
-  } else if(typeof this.json.cubetextures !== 'undefined'){
-    this.loaded=false;
-    this.textured=true;
-    this.textures=this.json.cubetextures;
-    this.cubeTexture=this.json.cubetexture;
-    loadCubeMap(this.cubeTexture, this.textures, this);
   } else this.textured=false;
 };
 
@@ -28,26 +23,30 @@ WObject.prototype.draw = function(){
   if(this.textured){
     var tex=textures[this.getCurrentTexture()];
     gl.activeTexture(tex.unit);
-    gl.bindTexture((typeof this.cubeTexture !== 'undefined') ? 
-      gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
+    gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   }
-  gl.drawArrays(this.drawType, 0, 
+  if(this.shaderVars.elementBuffer)  gl.drawElements(
+    this.drawType, Object3d.prototype[this.objs[0]].length, gl.UNSIGNED_BYTE, 0
+  );
+  else gl.drawArrays(this.drawType, 0, 
     pointLength/this.shaderVars.a_Position.size
   );
 };
 
 WObject.prototype.getCurrentTexture = function(){
-  return this.cubeTexture || this.textures[0];
+  return this.textures[0];
 };
 
 WObject.prototype.checkObjLoaded = function(){
   if(!this.textured) return;
   else{
-    this.loaded=true;
     this.textures.forEach(function(val){
-      if(textures[val] && textures[val].loaded) return;
-      this.loaded=false;
+      if(typeof textures[val] ==='undefined' || !textures[val].loaded){
+        this.loaded=false;
+        return;
+      }
     }, this);
+    this.loaded=true;
   }
 };
 
