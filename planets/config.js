@@ -7,6 +7,8 @@ var spaceImage='img/ship.gif';
 //Shape Configuration
 var circleDegrees = 36; 
 
+var timer = Date.now();
+
 //Get webgl canvas and context
 var canvas=document.getElementById('webgl'); 
 var gl = WebGLUtils.setupWebGL(canvas);
@@ -66,3 +68,5 @@ var surfaceSize=100;
 //Player Configuration
 var rotationSpeed=.1;
 var moveSpeed=.01;
+
+var orbitSpeed = .0001;

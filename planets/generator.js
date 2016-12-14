@@ -99,9 +99,9 @@ var Generator = function(){
       0, 0,-1,   0, 0,-1,    0, 0,-1,    0, 0,-1
     ]),
    
-    ambientColor: [.2, .2, .2],
-    lightDir: [1, 1, 1],
-    directionColor: [0.8, 0.8, 0.8],
+    ambientColor: function(){ return env.ambient; },
+    lightDir: function() { return env.sun.dir; },
+    directionColor: function() { return env.sun.color; },
 
     view: function(){ return player.view; },
     proj: function(){ return player.perspective; }

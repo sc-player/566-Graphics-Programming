@@ -32,7 +32,7 @@ Shooter.prototype.animate= function(){
   var model=this.shaderVars.u_Model.data;
   var shootRoll=Math.random()*1000;
   if(shootRoll>shootChance && this.speed<=0){
-    this.speed=Math.random()/15+.09;
+    this.speed=Math.random()/250+.003;
     this.size=Math.random()*3;
     var length=Math.random()*2+1;
     this.angle=Math.random()*30-15;
@@ -46,7 +46,10 @@ Shooter.prototype.animate= function(){
       this.size=0;
       this.angle=0;
       model.setIdentity();
-    } else model.translate(this.speed*Math.sin(this.angle*(Math.PI/180)), 
-        -this.speed*Math.cos(this.angle*(Math.PI/180)), 0); 
+    } else model.translate(
+        deltaTime*this.speed*Math.sin(this.angle*(Math.PI/180)), 
+       -deltaTime*this.speed*Math.cos(this.angle*(Math.PI/180)), 
+        0
+      ); 
   }
 };

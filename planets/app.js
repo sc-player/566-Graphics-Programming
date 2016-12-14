@@ -5,6 +5,7 @@
  */
 
 var player=new Player();
+var env = new Environment();
 var cameraTranslation = [0,0,0,0];
 var shouldDraw=true;
 
@@ -87,9 +88,12 @@ function drawScene(){
  * Updates all animated parameters.
  */
 function animate(){
-  if(onPlanet) for(var i=0; i<drawSurfLen; ++i){
-    if(drawArraySurface[i].__proto__.hasOwnProperty('animate'))
-      drawArraySurface[i]['animate']();  
+  if(onPlanet){ 
+    env.animate();
+    for(var i=0; i<drawSurfLen; ++i){
+      if(drawArraySurface[i].__proto__.hasOwnProperty('animate'))
+        drawArraySurface[i]['animate']();  
+    }
   }
   else for(var i=0; i<drawSpaceLen; ++i){
     if(drawArraySpace[i].__proto__.hasOwnProperty('animate'))
