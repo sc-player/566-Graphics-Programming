@@ -100,7 +100,7 @@ var Generator = function(){
     ]),
    
     ambientColor: [.2, .2, .2],
-    lightDir: [-1, 1, -1],
+    lightDir: [1, 1, 1],
     directionColor: [0.8, 0.8, 0.8],
 
     view: function(){ return player.view; },

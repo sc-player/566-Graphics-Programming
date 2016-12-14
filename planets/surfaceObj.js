@@ -1,8 +1,10 @@
 var mStack = [];
+
 function pushMat4(m){
   var m2 = new Matrix4(m);
   mStack.push(m2); 
 }
+
 function popMat4(){
   return mStack.pop();
 }
@@ -86,9 +88,8 @@ Object3d.prototype.createModelMatrix = function(){
     this.shaderVars.u_Model.data.scale(
       this.scale[0], this.scale[1], this.scale[2]
     );
-  ;
-  this.shaderVars.u_NormalMatrix.data = new Matrix4(this.shaderVars.u_Model.data).setInverseOf(
-    new Matrix4(player.view).concat(this.shaderVars.u_Model.data)
+  this.shaderVars.u_NormalMatrix.data= new Matrix4().setInverseOf(
+      this.shaderVars.u_Model.data
   ).transpose();
 };
 

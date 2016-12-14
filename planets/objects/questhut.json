@@ -9,12 +9,12 @@
   "textures": ["qh"], 
   "vars": {
     "attrib": [
-      "a_Position", "a_Normal", "u_Image", "u_Model", 
-      "u_View", "u_Proj", "u_NormalMatrix", "u_LightDir"
+      "a_Position", "a_Normal", "u_Image", "u_Model", "u_View", "u_Proj", 
+      "u_NormalMatrix", "u_LightDir", "u_ALightColor", "u_DLightColor"
     ], 
     "data": [
-      "indexed", "cubeNormals", null, "matid", 
-      "view", "proj", "matid", "lightDir"
+      "indexed", "cubeNormals", null, "matid", "view", "proj", 
+      "matid", "lightDir", "ambientColor", "directionColor"
     ], 
     "sizes": [3, 3, null, null, null, null, null, null]
   }
