@@ -2,17 +2,21 @@
   "vshader": "vbuilding.glsl", 
   "fshader": "fbuilding.glsl", 
   "blend": true, 
-  "coords": [15, 0.25, 0], 
-  "scale": [2, 1.5, 2], 
-  "objects": ["cube"], 
-  "textures": ["armory"], 
+  "pos": [15, 0.25, 0], 
+  "objects": [
+    {
+      "name": "cube",
+      "texture": "armory",
+      "scale": [2, 1.5, 2]
+    }
+  ], 
   "vars": {
     "attrib": [
       "a_Position", "a_Normal", "u_Image", "u_Model", "u_View", "u_Proj", 
       "u_NormalMatrix", "u_LightDir", "u_ALightColor", "u_DLightColor"
     ], 
     "data": [
-      "indexed", "cubeNormals", null, "matid", "view", "proj", 
+      "indexed", "indexed", null, "model", "view", "proj", 
       "matid", "lightDir", "ambientColor", "directionColor"
     ], 
     "sizes": [ 3, 3, null, null, null, null, null, null ]

@@ -89,20 +89,16 @@ var Generator = function(){
       -surfaceSize/20, -surfaceSize/20, surfaceSize/20, -surfaceSize/20,
       -surfaceSize/20, surfaceSize/20, surfaceSize/20, surfaceSize/20
     ]),
-
-    cubeNormals: new Float32Array([
-      0, 0, 1,   0, 0, 1,    0, 0, 1,    0, 0, 1,
-      1, 0, 0,   1, 0, 0,    1, 0, 0,    1, 0, 0,
-      0, 1, 0,   0, 1, 0,    0, 1, 0,    0, 1, 0,
-     -1, 0, 0,  -1, 0, 0,   -1, 0, 0,   -1, 0, 0,
-      0,-1, 0,   0,-1, 0,    0,-1, 0,    0,-1, 0,
-      0, 0,-1,   0, 0,-1,    0, 0,-1,    0, 0,-1
-    ]),
-   
+ 
     ambientColor: function(){ return env.ambient; },
     lightDir: function() { return env.sun.dir; },
     directionColor: function() { return env.sun.color; },
-
+    
+    matid: function(){ return new Matrix4(); },
+    model: function(){ return Object3d.prototype.model; },
+    normalMat: function() { 
+     return new Matrix4(Obj).setInverseOf(Object3d.prototype.model).transpose();
+    },
     view: function(){ return player.view; },
     proj: function(){ return player.perspective; }
   }

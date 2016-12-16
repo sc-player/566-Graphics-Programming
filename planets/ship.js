@@ -12,5 +12,5 @@ Ship.prototype.constructor = Ship;
  */
 Ship.prototype.draw= function(){
   if(player.fuel <= 0) return;
-  WObject.prototype.draw.call(this);
+  WObject.prototype.draw.call(this, this.shaderVars);
 };

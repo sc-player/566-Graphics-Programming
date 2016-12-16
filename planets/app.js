@@ -22,11 +22,11 @@ var ship=drawArraySpace[3];
 
 var drawArraySurface = [
   new Ground(planets),
-  new SurfaceShip(),
-  new FuelDepot(),
-  new Armory(),
-  new TradingPost(),
-  new QuestHut()
+//  new SurfaceShip(),
+//  new FuelDepot(),
+  new Armory()
+//  new TradingPost(),
+//  new QuestHut()
 ];
 
 var drawSpaceLen = drawArraySpace.length;
@@ -75,12 +75,12 @@ function drawScene(){
     player.updateCamera();
     for(var i=0; i<drawSurfLen; ++i){
       gl.useProgram(drawArraySurface[i]["program"]);
-      drawArraySurface[i]["draw"]();
+      drawArraySurface[i]["draw"](drawArraySurface[i].shaderVars);
     }
   }
   else for(var i=0; i<drawSpaceLen; ++i){
     gl.useProgram(drawArraySpace[i]["program"]);
-    drawArraySpace[i]["draw"]();
+    drawArraySpace[i]["draw"](drawArraySpace[i].shaderVars);
   }
 }
 

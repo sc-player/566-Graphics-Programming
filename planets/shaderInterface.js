@@ -1,90 +1,89 @@
 var SSources = {};
 var ShaderPrograms = {};
 
-var ShaderVars = function(vars, objs){
+var ShaderVars = function(vars){
   var ShaderVar = function(){
     this.type=-1;
     this.buffer=-1;
-    if(arguments.length===0){
+    if(arguments.length === 0){
       this.texture=true;
-    } else if(gl.hasOwnProperty(Object.prototype.toString.call(arguments[1]))){
+    } else if(arguments.length <= 2){
       this.data=arguments[0];
       this.type=arguments[1];
     } else {
       this.data=arguments[0];
       this.size=arguments[1];
       this.type=arguments[3];
-      if(arguments[2]===gl.ARRAY_BUFFER){ 
-        this.buffer=createBuff(arguments[2], (typeof(arguments[0])==="string" ?
-          Generator[arguments[0]] : arguments[0]));
-      } else if(arguments[2]===gl.ELEMENT_ARRAY_BUFFER){
-        this.buffer=arguments[0];
-      } 
+      if(this.data === 'indexed') return;
+      this.buffer=createBuff(
+        arguments[2], (typeof(arguments[0])==="string" ?
+        Generator[arguments[0]] : arguments[0])
+      );
     }
   };
   for(i=0; i<vars.attrib.length; ++i){
-    if(vars.data[i]==="indexed") {
-      this[vars.attrib[i]]=new ShaderVar(
-        Object3d.prototype[objs+"Buffer"].vertices, vars.sizes[i], 
-        gl.ELEMENT_ARRAY_BUFFER, (typeof vars.types !== 'undefined') ?
-        vars.types[i] : gl.FLOAT
-      );
-      this.elementBuffer=Object3d.prototype[objs+"Buffer"].indices;
-    }
-    
-    else if (vars.data[i] === "matid")
-      this[vars.attrib[i]] = new ShaderVar(new Matrix4());
-
-    else if(vars.data[i] === null) this[vars.attrib[i]] = new ShaderVar();
+    if(vars.data[i] === null) this[vars.attrib[i]] = new ShaderVar();
 
     else if(isUniform(vars.attrib[i])) 
       this[vars.attrib[i]] = new ShaderVar(
         typeof vars.data[i] === "string" ? 
-          typeof Generator[vars.data[i]] ==="function" ? 
-            Generator[vars.data[i]]() : Generator[vars.data[i]] : 
+          typeof Generator[vars.data[i]] === "function" ? 
+            Generator[vars.data[i]]() : 
+            Generator[vars.data[i]] : 
           vars.data[i], 
         typeof vars.types !=='undefined' ? vars.types[i] : gl.FLOAT
       );
 
     else this[vars.attrib[i]] = new ShaderVar(
       vars.data[i], vars.sizes[i], gl.ARRAY_BUFFER, 
-      (typeof vars.types !== 'undefined') ? vars.types[i] : gl.FLOAT 
+      (typeof vars.types !== 'undefined') ? vars.types[i] : gl.FLOAT
     ); 
   }
 }
 
-ShaderVars.prototype.setAllShaderVars = function(obj){
+ShaderVars.prototype.setAllShaderVars = function(owner, obj){
   var length=0;
   for(var v in this){ 
     if(v === "setAllShaderVars") continue;
-    if(v === "elementBuffer"){ 
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.elementBuffer);
-      continue;
+    if(this[v].data==="indexed") {
+      gl.bindBuffer(
+        gl.ELEMENT_ARRAY_BUFFER, Object3d.prototype[obj+"Buffer"].indices
+      );  
+      length = Object3d.prototype[obj].length; 
     }
-    if(this[v].texture){ setUniform(obj.program[v], 
-      textures[obj.getCurrentTexture()].unit-gl.TEXTURE0, false);
+    if(this[v].texture){ 
+      setUniform(owner.program[v], textures[owner.getCurrentTexture()].unit-
+        gl.TEXTURE0, false
+      );
       continue;
     }
 
     var dat = (typeof this[v].data === "string") ? 
-      (typeof Generator[this[v].data] === "function" ? 
-        Generator[this[v].data]():  Generator[this[v].data] ): this[v].data;
-    if(v==="a_Position") length=dat.length;
+      (this[v].data === 'indexed' ?
+        Object3d.prototype[obj + "Buffer"][
+          v.slice(2).toLowerCase()] :
+          (typeof Generator[this[v].data] === "function" ? 
+            Generator[this[v].data]() :  
+            Generator[this[v].data]))
+        : 
+      this[v].data;
+
+    if(v==="a_Position" && typeof elementBuffer === 'undefined') 
+      length = dat.length;
+    
     if(isUniform(v)){
       if(dat.hasOwnProperty("elements"))
-        gl.uniformMatrix4fv(obj.program[v], false, dat.elements);
+        gl.uniformMatrix4fv(owner.program[v], false, dat.elements);
       else 
-        setUniform(obj.program[v], dat, this[v].type || gl.FLOAT);
+        setUniform(owner.program[v], dat, this[v].type || gl.FLOAT);
     }
     else initAttribute(
-      obj.program[v], this[v].buffer, this[v].size, 
-      this[v].type, this[v].stride, this[v].offset
+      owner.program[v], dat instanceof WebGLBuffer ? dat : this[v].buffer, 
+      this[v].size, this[v].type, this[v].stride, this[v].offset
     );
   }
   return length;
 }
-
-
 
 /**
  * Load both shaders and create the program object. 
@@ -183,7 +182,7 @@ function isUniform(name){
  * @param (gl.Draw_Type) draw Draw type for the buffer.
  * @return (GLBuffer) Created buffer.
  */
-function createBuff(type, data){
+function createBuff(type, data, name){
   try{
     var res = gl.createBuffer();
     gl.bindBuffer(type, res);

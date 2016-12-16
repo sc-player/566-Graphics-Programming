@@ -5,7 +5,7 @@ var WObject = function(name){
   this.blend=this.json.blend;
   this.drawType=gl[this.json.drawType];
   this.objs = this.json.objects;
-  this.shaderVars=new ShaderVars(this.json.vars, this.objs);
+  this.shaderVars=new ShaderVars(this.json.vars);
   this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
   if(typeof this.json.textures !== 'undefined'){
     this.loaded=false;
@@ -18,28 +18,27 @@ var WObject = function(name){
   } else this.textured=false;
 };
 
-WObject.prototype.draw = function(){
-  var pointLength = this.shaderVars.setAllShaderVars(this);
+WObject.prototype.draw = function(v, obj){
+  var pointLength = v.setAllShaderVars(this, obj);
   if(this.textured){
     var tex=textures[this.getCurrentTexture()];
     gl.activeTexture(tex.unit);
     gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   }
-  if(this.shaderVars.elementBuffer)  gl.drawElements(
-    this.drawType, Object3d.prototype[this.objs[0]].length, gl.UNSIGNED_BYTE, 0
-  );
-  else gl.drawArrays(this.drawType, 0, 
-    pointLength/this.shaderVars.a_Position.size
+  if(typeof obj !== 'undefined')
+    gl.drawElements(this.drawType, pointLength, gl.UNSIGNED_BYTE, 0);
+  else gl.drawArrays(
+    this.drawType, 0, pointLength/this.shaderVars.a_Position.size
   );
 };
 
-WObject.prototype.getCurrentTexture = function(){
+WObject.prototype.getCurrentTexture = function(){ 
   return this.textures[0];
 };
 
 WObject.prototype.checkObjLoaded = function(){
   if(!this.textured) return;
-  else{
+  else if(typeof this.textures !== 'undefined'){
     this.textures.forEach(function(val){
       if(typeof textures[val] ==='undefined' || !textures[val].loaded){
         this.loaded=false;
@@ -51,19 +50,15 @@ WObject.prototype.checkObjLoaded = function(){
 };
 
 WObject.prototype.releaseTextureUnits = function(){
-  if(typeof this.cubeTexture !== 'undefined'){
-    texUnits[textures[this.cubeTexture].unit-gl.TEXTURE0]=false; 
-  } else {
+  if(typeof this.textures !== 'undefined')
     this.textures.forEach(function(val){
       texUnits[textures[val].unit-gl.TEXTURE0]=false;
     });
-  }
+  
 };
 
 WObject.prototype.gatherTextureUnits = function(){
-  if(typeof this.cubeTexture !== 'undefined'){
-    activateTexUnit(this.program, this.cubeTexture);
-  } else {
+  if(typeof this.textures !== 'undefined') {
     this.textures.forEach(function(val){
       activateTexUnit(this.program, val);
     }, this);
