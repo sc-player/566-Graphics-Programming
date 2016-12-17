@@ -74,8 +74,7 @@ ShaderVars.prototype.setAllShaderVars = function(owner, obj){
     if(isUniform(v)){
       if(dat.hasOwnProperty("elements"))
         gl.uniformMatrix4fv(owner.program[v], false, dat.elements);
-      else 
-        setUniform(owner.program[v], dat, this[v].type || gl.FLOAT);
+      else setUniform(owner.program[v], dat, this[v].type || gl.FLOAT);
     }
     else initAttribute(
       owner.program[v], dat instanceof WebGLBuffer ? dat : this[v].buffer, 

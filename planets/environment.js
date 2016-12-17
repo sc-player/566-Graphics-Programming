@@ -1,5 +1,5 @@
 var Environment = function(){
-  this.ambient = [.2, .2, .2];
+  this.ambient = [.8, .8, .8];
   this.objects = [
     new Sun()
   ];

@@ -67,9 +67,9 @@ Object3d.prototype.pyramidPoints=new Float32Array([
   //right 
   0,  1,  0,     1, -1,  1,     1, -1, -1,
   //left
-  0,  1,  0,    -1, -1,  -1,    1, -1, -1,
+  0,  1,  0,    -1, -1, -1,     1, -1, -1,
   //back
-  0,  1,  0,     1, -1,  -1,   -1, -1, -1,
+  0,  1,  0,    -1, -1,  1,    -1, -1, -1,
   //down
  -1, -1, -1,     1, -1, -1,     1, -1,  1,    -1, -1,  1,
 ]);
@@ -81,8 +81,8 @@ Object3d.prototype.pyramidNormals = function(vert){
     a=new Vector3(vert.slice(x, x+3));
     b=new Vector3(vert.slice(x+3, x+6));
     c=new Vector3(vert.slice(x+6, x+9));
-    u=new Vector3(b.Minus(a));
-    v=new Vector3(c.Minus(a));
+    u=b.Minus(a);
+    v=c.Minus(a);
     cross=u.Cross(v).elements;
     for(var y=0; y<3; ++y)
       res.push(Array.prototype.slice.call(cross));
@@ -133,7 +133,7 @@ Object3d.prototype.gatherTextureUnits = function(){
       activateTexUnit(this.program, val.texture);
     }
     if(typeof val.objects !== 'undefined'){
-      val.objs.forEach(gatherUnit, this);
+      val.objects.forEach(gatherUnit, this);
     }
   };
   WObject.prototype.gatherTextureUnits.call(this);
@@ -166,6 +166,8 @@ Object3d.prototype.draw = function(){
         AppendModelMatrix(val.pos, val.rot, val.scale);
         WObject.prototype.draw.call(this, this.shaderVars, val.name);
       }
+      if(typeof val.objects !== 'undefined')
+         val.objects.forEach(recursiveDraw, this);
     }
   };
   Object3d.prototype.model.setIdentity();
