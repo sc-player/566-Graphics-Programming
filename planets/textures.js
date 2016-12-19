@@ -16,6 +16,13 @@ function getNewTexUnit(){
   }
 }
 
+/**
+ * function activateTexUnit
+ * 
+ * @param {int} uni - Index of texture unit.
+ * @param {string} text - Filename of texture.
+ * Sends texture to GPU.
+ */
 function activateTexUnit(uni, text){
   var tex=textures[text];
   var type = (tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D;
@@ -46,9 +53,9 @@ function loadTexture(texName, object){
   * Creates texture when image is loaded, initializes the texture, and adds it 
   * to the object.
   *
-  * @param (Object) obj Object to add texture to.
-  * @param (int) uni Texture unit index.
+  * @param {string} name Filename of texture.
   * @param (Image) img Image object that was loaded.
+  * @param (Object) obj Object to add texture to.
   */
   function newTexture(name, img, obj){
     tex = gl.createTexture();
@@ -68,6 +75,8 @@ function loadCubeMap(texName, object){
   * to the object.
   *
   * @param (Object) obj Object to add texture to.
+  * @param {string} name Filename of texture.
+  * @param {string} side Side of cube.
   * @param (int) uni Texture unit index.
   * @param (Image) img Image object that was loaded.
   */

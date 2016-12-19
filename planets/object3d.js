@@ -1,4 +1,12 @@
+/**
+ * Philip Strachan
+ * object3d.js
+ * Generic 3d object. 
+ */
+
+//Constructor
 var Object3d = function(name){
+  //Recursively check if we need to load textures.
   function checkTextured(val){
     if(typeof val.texture === 'string'){
       this.loaded=false;
@@ -16,11 +24,14 @@ var Object3d = function(name){
   if(typeof this.json.scale !== 'undefined') this.scale=this.json.scale;
 };
 
+//Set prototype to WObject.
 Object3d.prototype = Object.create(WObject.prototype);
 Object3d.prototype.constructor = Object3d;
 
+//Global model matrix.
 Object3d.prototype.model = new Matrix4();
 
+//Cube
 Object3d.prototype.cubePoints=new Float32Array([
   //Corners
   //front
@@ -61,6 +72,7 @@ Object3d.prototype.cubeBuffer={
   indices: createBuff(gl.ELEMENT_ARRAY_BUFFER, Object3d.prototype.cube)
 };
 
+//Pyramid
 Object3d.prototype.pyramidPoints=new Float32Array([
   //front 
   0,  1,  0,    -1, -1,  1,     1, -1,  1,
@@ -103,10 +115,18 @@ Object3d.prototype.pyramidBuffer={
   indices: createBuff(gl.ELEMENT_ARRAY_BUFFER, Object3d.prototype.pyramid)
 };
 
+/**
+ * function getCurrentTexture
+ * Returns the current texure.
+ */
 Object3d.prototype.getCurrentTexture = function(){
   return this.currentTexture;
 };
 
+/**
+ * function checkObjLoaded
+ * Recursively checks if all textures are loaded.
+ */
 Object3d.prototype.checkObjLoaded = function(obj){
   function checkTexLoaded(val){
     if(typeof val.texture !== 'undefined' && (
@@ -127,6 +147,10 @@ Object3d.prototype.checkObjLoaded = function(obj){
   }
 };
 
+/**
+ * function gatherTextureUnits
+ * Recursively gather a texture unit for all textures.
+ */
 Object3d.prototype.gatherTextureUnits = function(){
   function gatherUnit(val){
     if(typeof val.texture !== 'undefined'){
@@ -140,34 +164,20 @@ Object3d.prototype.gatherTextureUnits = function(){
   this.objs.forEach(gatherUnit, this);
 };
 
-Object3d.prototype.createModelMatrix = function(){
-  if(typeof this.pos !== 'undefined')
-    Object3d.prototype.model.translate(
-      this.pos[0], this.pos[1], this.pos[2]
-    );
-  if(typeof this.rot !== 'undefined')
-    Object3d.prototype.model.rotate(
-      this.json.rot[0], this.rot[1], this.rot[2], this.rot[3]
-    );
-  if(typeof this.scale !== 'undefined')
-    Object3d.prototype.model.scale(
-      this.scale[0], this.scale[1], this.scale[2]
-    );
-  this.shaderVars.u_NormalMatrix.data= new Matrix4().setInverseOf(
-      Object3d.prototype.model
-  ).transpose();
-};
-
+/**
+ * function draw
+ * Recursively draw object. Sibling objects do not work at the moment.
+ */
 Object3d.prototype.draw = function(){
   function recursiveDraw(val){
     if(typeof val === 'object') {
+      AppendModelMatrix(val.pos, val.rot, val.scale);
       if(typeof val.texture === 'string') this.currentTexture = val.texture;
       if(typeof val.name === 'string'){ 
-        AppendModelMatrix(val.pos, val.rot, val.scale);
-        WObject.prototype.draw.call(this, this.shaderVars, val.name);
+        WObject.prototype.draw.call(this, this.shaderVars, val.name); 
       }
-      if(typeof val.objects !== 'undefined')
-         val.objects.forEach(recursiveDraw, this);
+      if(typeof val.objects !== 'undefined') 
+        val.objects.forEach(recursiveDraw, this);
     }
   };
   Object3d.prototype.model.setIdentity();

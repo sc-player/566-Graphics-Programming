@@ -10,10 +10,15 @@
   ], "vars": {
     "attrib": [
       "a_Position", "a_TexCoord", "u_Image", "u_View", "u_Proj", 
-      "u_NormalMatrix", "u_LightDir", "u_ALightColor", "u_DLightColor"
+      "u_LightDir", "u_ALightColor", "u_DLightColor",
+      "u_LightPos", "u_LightCol", "u_LEnabled"
     ], "data": [
-      "groundPoints", "groundCoords", null, "view", "proj", 
-      "matid", "lightDir", "ambientColor", "directionColor"
-    ], "sizes": [3, 2, null, null, null, null, null, null]
+      "groundPoints", "groundCoords", null, "view", "proj","lightDir", 
+      "ambientColor", "directionColor", "lpos", "lcol", "lenable"
+    ], "sizes": [3, 2, null, null, null, null, null, null],
+    "types": [
+      null, null, null, null, null, null, null, null, 
+      null, null, "INT"
+    ]
   }
 }

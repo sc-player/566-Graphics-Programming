@@ -1,7 +1,8 @@
 /**
  * Philip Strachan
- * planets.js
- * Creates a space scene that you can move around in a 2d space. 
+ * app.js
+ * Creates a space scene that you can move around in a 2d space, and land on
+ * a planet to walk around in a 3d environment. 
  */
 
 var player=new Player();
@@ -24,7 +25,9 @@ var drawArraySurface = [
   new Ground(planets),
 //  new SurfaceShip(),
 //  new FuelDepot(),
-  new Armory()
+  new Armory(),
+  new Light1(),
+  new Light2()
 //  new TradingPost(),
 //  new QuestHut()
 ];
@@ -36,7 +39,7 @@ var onPlanet=false;
 
 /* function initGL
  *
- * Creates shaders, sets event handlers, and initializes objects.
+ * Initializes handlers and sets some gl flags.
  */
 function initGL(){
   document.onkeydown = function(event){handleKeyDown(event, ship);};

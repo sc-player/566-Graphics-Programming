@@ -1,25 +1,49 @@
+/**
+ * Philip Strachan
+ * input.js
+ * Input handler.
+ */
+
 //What keys are we pressing?
 var currentlyPressedKeys = {};
 var deltaTime=0.0;
 var lastFrame=0.0;
 
+/**
+ * function updateTime
+ * updates global deltaTime variable.
+ */
 function updateTime(){
   var current = Date.now();
   deltaTime=current-lastFrame;
   lastFrame=current;
 }
 
+/**
+ * function handleKeyDown
+ * Key Down event handler.
+ */
 function handleKeyDown(event, ship){
   if(!onPlanet) handleKeyDownSpace(event, ship);
+  else handleKeyDownSurface(event);
   currentlyPressedKeys[event.keyCode]=true;
 }
 
 /**
- * function handleKeyDown
+ * function handleKeyDownSurface
+ * Turns on and off lights.
+ */
+function handleKeyDownSurface(event){
+  if(event.keyCode === 65) {
+    env.enabled[0][0] = !env.enabled[0][0];
+  } else if(event.keyCode === 83)
+    env.enabled[1][0] = !env.enabled[1][0];
+};
+
+/**
+ * function handleKeyDownSpace
  *
- * Called on key press. Enables the variable corresponding to the keycode of
- * the key that was pressed.  If it is an arrow key, change camera position and
- * update the player.
+ * Update position of player and subtract fuel.
  */
 function handleKeyDownSpace(event, ship){
   if(currentlyPressedKeys[event.keyCode]==true) return;

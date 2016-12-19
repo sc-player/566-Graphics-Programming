@@ -1,3 +1,4 @@
+//Surface objects.
 var Ground = function(p){
   WObject.call(this, "ground");
   this.drawType=gl.TRIANGLE_STRIP;
@@ -49,3 +50,18 @@ var QuestHut = function(){
 
 QuestHut.prototype = Object.create(Object3d.prototype);
 QuestHut.prototype.constructor = QuestHut;
+
+var Light1 = function(){
+  Object3d.call(this, "light1");
+}
+
+Light1.prototype = Object.create(Object3d.prototype);
+Light1.prototype.constructor = Light1;
+
+var Light2 = function(){
+  Object3d.call(this, "light2");
+}
+
+Light2.prototype = Object.create(Object3d.prototype);
+Light2.prototype.constructor = Light2;
+

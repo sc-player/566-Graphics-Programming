@@ -1,5 +1,12 @@
+/**
+ * Philip Strachan
+ * generator.js
+ * Bridge between shaderVars and data.
+ */
 var Generator = function(){
   return {
+
+    //Grid
     gridPoints: function(){
       var res=[];
         for(this.i=-galaxySize/2-tileSize/2; this.i<=galaxySize/2+tileSize; this.i+=tileSize){
@@ -8,6 +15,7 @@ var Generator = function(){
       return new Float32Array([].concat.apply([], res));
     }(),
     
+    //Stars
     starPoints: function(){
       var res=[];
       for(this.i=0; this.i<starCount*2; this.i++){
@@ -33,9 +41,11 @@ var Generator = function(){
       }
       return new Float32Array(res);
     }(),
-  
+ 
+    //Shooting star 
     shootPoints: new Float32Array([0,1,0,1.2]),
     
+    //Ship
     shipPoints: new Float32Array([
       -shipWidth, -shipHeight, shipWidth, -shipHeight,
       -shipWidth, shipHeight, shipWidth, shipWidth
@@ -43,6 +53,7 @@ var Generator = function(){
 
     shipCoords: new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
 
+    //Planets
     planetPoints: function(){
       var res=[];
       for(this.i=0; this.i<planetCount; this.i++){
@@ -79,6 +90,7 @@ var Generator = function(){
       return new Float32Array(res);
     }(),
     
+    //Ground
     groundPoints: new Float32Array([
       -surfaceSize/2, -1, -surfaceSize/2, surfaceSize/2,
       -1, -surfaceSize/2, -surfaceSize/2, -1,
@@ -90,16 +102,21 @@ var Generator = function(){
       -surfaceSize/20, surfaceSize/20, surfaceSize/20, surfaceSize/20
     ]),
  
+    //Lighting
     ambientColor: function(){ return env.ambient; },
     lightDir: function() { return env.sun.dir; },
     directionColor: function() { return env.sun.color; },
+    lcol: function() { return env.lightColors; },
+    lpos: function() { return env.lights; },
+    lenable: function() { return env.enabled; },
     
+    //Matrices
     matid: function(){ return new Matrix4(); },
     model: function(){ return Object3d.prototype.model; },
     normalMat: function() { 
      return new Matrix4(Obj).setInverseOf(Object3d.prototype.model).transpose();
     },
     view: function(){ return player.view; },
-    proj: function(){ return player.perspective; }
+    proj: function(){ return player.perspective; },
   }
 }();

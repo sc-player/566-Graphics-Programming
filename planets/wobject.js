@@ -1,12 +1,24 @@
+/**
+ * Philip Strachan
+ * wobject.js
+ * Generic drawable object.
+ */
 var WObject = function(name){
+  //Parse JSON file
   this.json = JSON.parse(loadExternalFile(objDir+name+".json"));
   this.vshader= this.json.vshader;
   this.fshader= this.json.fshader;
   this.blend=this.json.blend;
   this.drawType=gl[this.json.drawType];
   this.objs = this.json.objects;
-  this.shaderVars=new ShaderVars(this.json.vars);
+
+  //Create ShaderVars
+  this.shaderVars=new ShaderVars(this.json.vars, this);
+ 
+  //Create shader program
   this.program=createShaderProgram(this.vshader, this.fshader, this.shaderVars);
+
+  //Load textures.
   if(typeof this.json.textures !== 'undefined'){
     this.loaded=false;
     this.textured=true;
@@ -18,6 +30,7 @@ var WObject = function(name){
   } else this.textured=false;
 };
 
+//Generic draw functionality.
 WObject.prototype.draw = function(v, obj){
   var pointLength = v.setAllShaderVars(this, obj);
   if(this.textured){
@@ -25,17 +38,19 @@ WObject.prototype.draw = function(v, obj){
     gl.activeTexture(tex.unit);
     gl.bindTexture((tex.cube) ? gl.TEXTURE_CUBE_MAP : gl.TEXTURE_2D, tex);
   }
-  if(typeof obj !== 'undefined')
+  if(typeof obj !== 'undefined')    //indexed
     gl.drawElements(this.drawType, pointLength, gl.UNSIGNED_BYTE, 0);
-  else gl.drawArrays(
+  else gl.drawArrays(               
     this.drawType, 0, pointLength/this.shaderVars.a_Position.size
   );
 };
 
+//Return default texture.
 WObject.prototype.getCurrentTexture = function(){ 
   return this.textures[0];
 };
 
+//Checks to see if all textures are loaded.
 WObject.prototype.checkObjLoaded = function(){
   if(!this.textured) return;
   else if(typeof this.textures !== 'undefined'){
@@ -49,6 +64,7 @@ WObject.prototype.checkObjLoaded = function(){
   }
 };
 
+//Release texture units when not needed.
 WObject.prototype.releaseTextureUnits = function(){
   if(typeof this.textures !== 'undefined')
     this.textures.forEach(function(val){
@@ -57,6 +73,7 @@ WObject.prototype.releaseTextureUnits = function(){
   
 };
 
+//Send textures to the GPU.
 WObject.prototype.gatherTextureUnits = function(){
   if(typeof this.textures !== 'undefined') {
     this.textures.forEach(function(val){

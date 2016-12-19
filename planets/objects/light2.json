@@ -2,21 +2,12 @@
   "vshader": "vbuilding.glsl", 
   "fshader": "fbuilding.glsl", 
   "blend": true, 
-  "pos": [15, 0, 0], 
+  "pos": [13, 2, -4], 
   "objects": [ 
     {
       "name": "cube",
       "texture": "armory",
-      "scale": [1.2, 1.4, 1.2],
-      "pos": [0, 0.2, 0],
-      "objects": [
-        {
-          "name": "pyramid",
-          "texture": "armory",
-          "scale": [1.5, 0.5, 1.5],
-          "pos": [0, 1.4, 0]
-        }
-      ]
+      "scale": [0.2, 0.2, 0.2]
     } 
   ], 
   "vars": {

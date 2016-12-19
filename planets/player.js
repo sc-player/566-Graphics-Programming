@@ -9,6 +9,7 @@ var Player=function(){
   this.perspective = (new Matrix4()).setPerspective(30, canvas.width/canvas.height, 1, 100);
 };
 
+//Reset position
 Player.prototype.startPosition = function(){
   this.worldPos=new Vector3([0, 0, 0]);
   this.worldFacing=new Vector3([1, 0, 0]);
@@ -17,6 +18,7 @@ Player.prototype.startPosition = function(){
   this.view=new Matrix4();
 };
 
+//Read key variables and move camera if needed.
 Player.prototype.updateCamera = function(){
   if(currentlyPressedKeys[37]){
     this.rotate(false);
@@ -110,6 +112,7 @@ Player.prototype.checkPlanet=function(){
   this.planet=-1;
 };
 
+//Rotate camera.
 Player.prototype.rotate=function(pos){
   if(pos){
     this.currentFacingAngle+=rotationSpeed*Math.PI/180*deltaTime;
@@ -121,6 +124,7 @@ Player.prototype.rotate=function(pos){
   this.worldFacing.normalize();
 };
 
+//Move camera.
 Player.prototype.move=function(pos){
   if(pos){
     this.worldPos.elements[0]+=moveSpeed*this.worldFacing.elements[0]*deltaTime;
@@ -139,6 +143,7 @@ Player.prototype.move=function(pos){
     this.worldPos.elements[2]=-surfaceSize/2;
 };
 
+//Get current planet.
 Player.prototype.getPTypeIndex = function(){
   if(this.planet<0) return -1;
   else return this.planets.types[this.planet];

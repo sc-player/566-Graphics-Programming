@@ -69,4 +69,5 @@ var surfaceSize=100;
 var rotationSpeed=.1;
 var moveSpeed=.01;
 
+//Lighting Configuration
 var orbitSpeed = .0001;

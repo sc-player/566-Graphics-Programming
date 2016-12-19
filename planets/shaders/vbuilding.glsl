@@ -9,8 +9,8 @@ varying vec3 vTexCoords;
 varying vec3 vNorm;
 
 void main(){
-  vPosition = u_View*u_Model*a_Position;
-  gl_Position = u_Proj*vPosition;
+  vPosition = u_Model*a_Position;
+  gl_Position = u_Proj*u_View*vPosition;
   vTexCoords = vec3(-a_Position.x, -a_Position.y, -a_Position.z);
   vNorm = normalize(vec3(u_NormalMatrix * a_Normal));
 }

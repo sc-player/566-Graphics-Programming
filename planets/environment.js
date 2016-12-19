@@ -1,17 +1,27 @@
+/**
+ * Philip Strachan
+ * environment.js
+ * Controls lighting and other environmental effects.
+ */
 var Environment = function(){
-  this.ambient = [.8, .8, .8];
+  this.ambient = [.2, .2, .2];
+  this.lights = [[13, 2, 4], [13, 2, -4]];
+  this.lightColors = [[1, 0, 0], [0, 0, 1]];
+  this.enabled = [[1], [1]];
   this.objects = [
     new Sun()
   ];
   this.sun=this.objects[0];
 };
 
+//Animate the environment.
 Environment.prototype.animate = function(){
   this.objects.forEach(function(val){
     val.animate();
   });
 };
 
+//Directional light data.
 Sun = function(){
   this.dir = [-1, 0, 0];
   this.increasing = [true, true, true];
@@ -19,6 +29,10 @@ Sun = function(){
   this.night = true;
 };
 
+/**
+ * Animates the light direction in a circular "orbit".  Lowers and raises the 
+ * color values appropriately based on the angle of the sun.
+ */
 Sun.prototype.animate = function(){
   for(var i=0; i<2; ++i){ 
     this.dir[i] += (this.increasing[i] ? 1 : -1) * deltaTime * orbitSpeed;
@@ -35,3 +49,4 @@ Sun.prototype.animate = function(){
   else if(!this.night && this.color[0] <= .8) for(var i=0; i<3; ++i) 
     this.color[i]+=.0002 * deltaTime;
 };
+
